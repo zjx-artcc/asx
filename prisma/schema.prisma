@@ -1,0 +1,128 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scopes            String[]
+  id_token          String?  @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  cid           String
+  firstName     String?
+  lastName      String?
+  fullName      String?
+  email         String?   @unique
+  emailVerified DateTime?
+  artcc         String
+  rating        Int
+  division      String
+
+  logs Log[]
+
+  accounts Account[]
+  sessions Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model VideoMap {
+    name       String   @id
+
+    mappings    MappingJson[]
+}
+
+model SectorMapping {
+    id          String   @id @default(cuid())
+    idsRadarSectorId String
+    bannerKey   String
+    
+    mappings    MappingJson[]
+}
+
+model MappingJson {
+    id          String   @id @default(cuid())
+    
+    jsonKey     String
+    airportCondition AirportCondition? @relation(fields: [airportConditionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    airportConditionId String?
+
+    sectorMapping SectorMapping? @relation(fields: [sectorMappingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    sectorMappingId String?
+
+    videoMap VideoMap? @relation(fields: [videoMapId], references: [name], onDelete: Cascade, onUpdate: Cascade)
+    videoMapId String?
+}
+
+model Airport {
+    icao       String   @id
+    conditions AirportCondition[]
+}
+
+model AirportCondition {
+    id          String   @id @default(cuid())
+    
+    name        String
+
+    airport     Airport @relation(fields: [icao], references: [icao], onDelete: Cascade, onUpdate: Cascade)
+    icao        String
+
+    mappings    MappingJson[]
+}
+
+enum LogType {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum LogModel {
+  SECTOR_MAPPING
+  AIRPORT
+  AIRPORT_CONDITION
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  type      LogType
+  model     LogModel
+  message   String
+  timestamp DateTime
+  userId    String
+}
