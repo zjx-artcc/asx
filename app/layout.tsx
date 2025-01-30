@@ -8,7 +8,6 @@ import theme from "@/theme/theme";
 import Navbar from "@/components/Navbar/Navbar";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/auth/auth";
-import {Container, Typography} from "@mui/material";
 import {ToastContainer} from "react-toastify";
 import {Metadata} from "next";
 
@@ -38,9 +37,7 @@ export default async function RootLayout({
     <AppRouterCacheProvider>
         <ThemeProvider theme={theme}>
             <Navbar session={session}/>
-            <Container maxWidth="xl">
-                {children}
-            </Container>
+            {children}
             <ToastContainer theme="dark"/>
         </ThemeProvider>
     </AppRouterCacheProvider>
