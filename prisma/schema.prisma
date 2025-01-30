@@ -62,47 +62,70 @@ model VerificationToken {
 }
 
 model VideoMap {
-    name       String   @id
+  id   String @id @default(cuid())
+  name String @unique
 
-    mappings    MappingJson[]
+  order Int @default(0)
+
+  mappings MappingJson[]
+}
+
+model RadarFacility {
+  id   String @id @default(cuid())
+  name String @unique
+
+  sectors SectorMapping[]
+
+  order Int @default(0)
 }
 
 model SectorMapping {
-    id          String   @id @default(cuid())
-    idsRadarSectorId String
-    bannerKey   String
-    
-    mappings    MappingJson[]
+  id               String @id @default(cuid())
+  idsRadarSectorId String @unique
+
+  name String
+
+  radarFacility   RadarFacility @relation(fields: [radarFacilityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  radarFacilityId String
+
+  order Int @default(0)
+
+  mappings MappingJson[]
 }
 
 model MappingJson {
-    id          String   @id @default(cuid())
-    
-    jsonKey     String
-    airportCondition AirportCondition? @relation(fields: [airportConditionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    airportConditionId String?
+  id String @id @default(cuid())
 
-    sectorMapping SectorMapping? @relation(fields: [sectorMappingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    sectorMappingId String?
+  jsonKey            String
+  airportCondition   AirportCondition? @relation(fields: [airportConditionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  airportConditionId String?
 
-    videoMap VideoMap? @relation(fields: [videoMapId], references: [name], onDelete: Cascade, onUpdate: Cascade)
-    videoMapId String?
+  sectorMapping   SectorMapping? @relation(fields: [sectorMappingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sectorMappingId String?
+
+  videoMap   VideoMap? @relation(fields: [videoMapId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  videoMapId String?
+
+  @@unique([sectorMappingId, videoMapId, airportConditionId])
 }
 
 model Airport {
-    icao       String   @id
-    conditions AirportCondition[]
+  id         String             @id @default(cuid())
+  icao       String             @unique
+  conditions AirportCondition[]
+
+  order Int @default(0)
 }
 
 model AirportCondition {
-    id          String   @id @default(cuid())
-    
-    name        String
+  id String @id @default(cuid())
 
-    airport     Airport @relation(fields: [icao], references: [icao], onDelete: Cascade, onUpdate: Cascade)
-    icao        String
+  name String
 
-    mappings    MappingJson[]
+  airport   Airport @relation(fields: [airportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  airportId String
+
+  mappings MappingJson[]
 }
 
 enum LogType {
@@ -112,9 +135,11 @@ enum LogType {
 }
 
 enum LogModel {
+  VIDEO_MAP
   SECTOR_MAPPING
   AIRPORT
   AIRPORT_CONDITION
+  RADAR_FACILITY
 }
 
 model Log {

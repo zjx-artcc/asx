@@ -2,8 +2,11 @@ import {Card, CardContent, List, ListItemButton, ListItemIcon, ListItemText, Typ
 import Link from 'next/link';
 import React from 'react';
 import {
+    AirplanemodeActive,
     Home,
     ListAlt,
+    Radar,
+    Wallpaper,
 } from "@mui/icons-material";
 
 export default function AdminMenu() {
@@ -18,6 +21,30 @@ export default function AdminMenu() {
                                 <Home/>
                             </ListItemIcon>
                             <ListItemText primary="Overview"/>
+                        </ListItemButton>
+                    </Link>
+                    <Link href="/admin/airports" style={{textDecoration: 'none', color: 'inherit',}}>
+                        <ListItemButton>
+                            <ListItemIcon>
+                                <AirplanemodeActive />
+                            </ListItemIcon>
+                            <ListItemText primary="Airports"/>
+                        </ListItemButton>
+                    </Link>
+                    <Link href="/admin/facilities" style={{textDecoration: 'none', color: 'inherit',}}>
+                        <ListItemButton>
+                            <ListItemIcon>
+                                <Radar />
+                            </ListItemIcon>
+                            <ListItemText primary="Radar Facilities"/>
+                        </ListItemButton>
+                    </Link>
+                    <Link href="/admin/video-maps" style={{textDecoration: 'none', color: 'inherit',}}>
+                        <ListItemButton>
+                            <ListItemIcon>
+                                <Wallpaper />
+                            </ListItemIcon>
+                            <ListItemText primary="Video Maps"/>
                         </ListItemButton>
                     </Link>
 
