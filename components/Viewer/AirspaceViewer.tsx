@@ -1,11 +1,11 @@
 import React from 'react';
 import {Airport, AirportCondition, MappingJson, RadarFacility, SectorMapping, VideoMap} from "@prisma/client";
 import prisma from "@/lib/db";
-import AirportConditionSelector from "@/components/Viewer/AirportCondition/AirportConditionSelector";
-import {Card, CardContent, Divider, Grid2, Typography} from "@mui/material";
+import AirspaceConditionSelector from "@/components/Viewer/AirspaceCondition/AirspaceConditionSelector";
+import {Box, Card, CardContent, Divider, Grid2, Typography} from "@mui/material";
 import VideoMapSelector from "@/components/Viewer/VideoMapSelector/VideoMapSelector";
 import FacilitySelector from "@/components/Viewer/FacilitySelector/FacilitySelector";
-import RenderMap from "@/components/Viewer/Map/RenderMap";
+import MapWrapper from "@/components/Viewer/Map/MapWrapper";
 
 export type AirportConditionWithAirport = AirportCondition & { airport: Airport, };
 export type MappingJsonWithConditions = MappingJson & { airportCondition?: AirportConditionWithAirport, };
@@ -71,25 +71,30 @@ export default async function AirspaceViewer() {
     });
 
     return (
-        <>
-            <AirportConditionSelector airports={allAirports as AirportWithConditions[]}/>
-            <Grid2 container columns={10}>
-                <Grid2 size={2}>
-                    <Card>
+        <Box>
+            <Grid2 container columns={10} spacing={2} sx={{my: 2, mx: 2,}}>
+                <Grid2 size={10}>
+                    <AirspaceConditionSelector airports={allAirports as AirportWithConditions[]}/>
+                </Grid2>
+                <Grid2 size={2} sx={{minHeight: 'calc(100vh - 64px - 96px)',}}>
+                    <Card sx={{height: '100%',}}>
                         <CardContent>
                             <Typography variant="h6" textAlign="center" gutterBottom>Airspace Explorer</Typography>
+                            <Divider sx={{my: 2,}}/>
                             <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
                             <Divider sx={{my: 2,}}/>
                             <FacilitySelector allFacilities={allFacilities as RadarFacilityWithSectors[]}/>
                         </CardContent>
                     </Card>
                 </Grid2>
-                <Grid2 size={8}>
-                    <RenderMap allConditions={allAirports.flatMap((a) => a.conditions) as AirportConditionWithAirport[]}
-                               allVideoMaps={allVideoMaps as VideoMapWithMappings[]}
-                               allFacilities={allFacilities as RadarFacilityWithSectors[]}/>
+                <Grid2 size={8} sx={{minHeight: 'calc(100vh - 64px - 96px)',}}>
+                    <MapWrapper
+                        allConditions={allAirports.flatMap((a) => a.conditions) as AirportConditionWithAirport[]}
+                        allVideoMaps={allVideoMaps as VideoMapWithMappings[]}
+                        allFacilities={allFacilities as RadarFacilityWithSectors[]}/>
                 </Grid2>
             </Grid2>
-        </>
+        </Box>
+
     );
 }

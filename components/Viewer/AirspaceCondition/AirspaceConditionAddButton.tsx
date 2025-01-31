@@ -17,7 +17,7 @@ import {Add} from "@mui/icons-material";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {AirportCondition} from "@prisma/client";
 
-export default function AirportConditionAddButton({allAirports,}: { allAirports: AirportWithConditions[], }) {
+export default function AirspaceConditionAddButton({allAirports,}: { allAirports: AirportWithConditions[], }) {
 
     const pathname = usePathname();
     const router = useRouter();
@@ -55,7 +55,7 @@ export default function AirportConditionAddButton({allAirports,}: { allAirports:
                 </IconButton>
             </Tooltip>
             <Dialog open={open} onClose={close}>
-                <DialogTitle>Add Airport Condition</DialogTitle>
+                <DialogTitle>Add Airspace Condition</DialogTitle>
                 <DialogContent>
                     <Stack direction="column" spacing={2}>
                         <Autocomplete
@@ -65,7 +65,7 @@ export default function AirportConditionAddButton({allAirports,}: { allAirports:
                                 setSelectedAirport(value);
                             }}
                             value={selectedAirport}
-                            renderInput={(params) => <TextField {...params} label="Airport" variant="filled"/>}
+                            renderInput={(params) => <TextField {...params} label="Airspace/Airport" variant="filled"/>}
                         />
 
                         <Autocomplete
@@ -78,7 +78,7 @@ export default function AirportConditionAddButton({allAirports,}: { allAirports:
                             value={selectedCondition}
                             renderInput={(params) => <TextField {...params}
                                                                 helperText="You must select an airport first."
-                                                                label="Airport Condition" variant="filled"/>}
+                                                                label="Condition" variant="filled"/>}
                         />
                     </Stack>
                 </DialogContent>

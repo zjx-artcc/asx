@@ -45,7 +45,7 @@ export default function FacilitySelector({allFacilities}: { allFacilities: Radar
     return (
         <Box>
             <FacilityAddForm facilities={allFacilities} onSubmit={onAddFacility}/>
-            <Divider sx={{my: 1,}}/>
+            <Divider sx={{my: 2,}}/>
             <Typography variant="subtitle2" textAlign="center" gutterBottom>Selected Facilities</Typography>
             {activeFacilities.length === 0 &&
                 <Typography variant="subtitle1" textAlign="center">No facilities selected</Typography>}

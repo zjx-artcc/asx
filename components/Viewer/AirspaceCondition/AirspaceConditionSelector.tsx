@@ -1,12 +1,12 @@
 'use client';
 import React from 'react';
 import {AirportWithConditions} from "@/components/Viewer/AirspaceViewer";
-import {AppBar, Chip, Stack, Toolbar, Typography} from "@mui/material";
+import {Chip, Paper, Stack, Typography} from "@mui/material";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
-import AirportConditionAddButton from "@/components/Viewer/AirportCondition/AirportConditionAddButton";
+import AirspaceConditionAddButton from "@/components/Viewer/AirspaceCondition/AirspaceConditionAddButton";
 import {AirportCondition} from "@prisma/client";
 
-export default function AirportConditionSelector({airports}: { airports: AirportWithConditions[], }) {
+export default function AirspaceConditionSelector({airports}: { airports: AirportWithConditions[], }) {
 
     const router = useRouter();
     const pathname = usePathname();
@@ -26,19 +26,20 @@ export default function AirportConditionSelector({airports}: { airports: Airport
     }
 
     return (
-        <AppBar position="static" elevation={1} sx={{ borderBottom: 1, }}>
-            <Toolbar variant="dense">
-                <AirportConditionAddButton allAirports={airports}/>
-                <Stack direction="row" spacing={1} sx={{overflowX: 'auto', ml: 2,}}>
+        <Paper sx={{p: 0.5,}}>
+            <Stack direction="row" spacing={1} alignItems="center">
+                <AirspaceConditionAddButton allAirports={airports}/>
+                <Stack direction="row" spacing={1} sx={{overflowX: 'auto',}}>
                     {activeConditions.map(condition => (
-                        <Chip key={condition.id} color="success" size="small"
+                        <Chip key={condition.id} size="small"
                               label={`${getAirport(condition.id)?.icao || ''}/${condition.name}`}
                               onDelete={() => deleteCondition(condition)}/>
                     ))}
                     {activeConditions.length === 0 &&
-                        <Typography variant="subtitle1">No airport conditions set.</Typography>}
+                        <Typography variant="subtitle1">Add airspace conditions here.</Typography>}
                 </Stack>
-            </Toolbar>
-        </AppBar>
+            </Stack>
+        </Paper>
+
     );
 }
