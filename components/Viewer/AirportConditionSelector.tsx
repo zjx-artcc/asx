@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import {AirportWithConditions} from "@/components/Viewer/AirspaceViewer";
-import {AppBar, Chip, Stack, Toolbar} from "@mui/material";
+import {AppBar, Chip, Stack, Toolbar, Typography} from "@mui/material";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import AirportConditionAddButton from "@/components/Viewer/AirportConditionAddButton";
 import {AirportCondition} from "@prisma/client";
@@ -26,7 +26,7 @@ export default function AirportConditionSelector({airports}: { airports: Airport
     }
 
     return (
-        <AppBar position="static" elevation={1}>
+        <AppBar position="static" elevation={1} sx={{ borderBottom: 1, }}>
             <Toolbar variant="dense">
                 <AirportConditionAddButton allAirports={airports}/>
                 <Stack direction="row" spacing={1} sx={{overflowX: 'auto', ml: 2,}}>
@@ -35,6 +35,7 @@ export default function AirportConditionSelector({airports}: { airports: Airport
                               label={`${getAirport(condition.id)?.icao || ''}/${condition.name}`}
                               onDelete={() => deleteCondition(condition)}/>
                     ))}
+                    {activeConditions.length === 0 && <Typography variant="subtitle1">No airport conditions selected</Typography>}
                 </Stack>
             </Toolbar>
         </AppBar>
