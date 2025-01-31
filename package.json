@@ -21,23 +21,25 @@
     "@mui/material-nextjs": "^6.1.6",
     "@mui/x-data-grid": "^7.22.2",
     "@prisma/client": "^5.22.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-toastify": "^10.0.6",
+    "leaflet": "^1.9.4",
     "next": "15.1.6",
     "next-auth": "4.24.10",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
+    "react-toastify": "^10.0.6",
     "sharp": "^0.33.5",
     "uploadthing": "^7.3.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "prisma": "^5.22.0",
-    "@eslint/eslintrc": "^3"
+    "typescript": "^5"
   }
 }

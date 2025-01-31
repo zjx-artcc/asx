@@ -1,5 +1,12 @@
-import React from 'react';
-import {Airport, AirportCondition, MappingJson, RadarFacility, SectorMapping, VideoMap} from "@prisma/client";
+import React from "react";
+import {
+  Airport,
+  AirportCondition,
+  MappingJson,
+  RadarFacility,
+  SectorMapping,
+  VideoMap,
+} from "@prisma/client";
 import prisma from "@/lib/db";
 import AirspaceConditionSelector from "@/components/Viewer/AirspaceCondition/AirspaceConditionSelector";
 import {Box, Card, CardContent, Divider, Grid2, Typography} from "@mui/material";
@@ -7,68 +14,79 @@ import VideoMapSelector from "@/components/Viewer/VideoMapSelector/VideoMapSelec
 import FacilitySelector from "@/components/Viewer/FacilitySelector/FacilitySelector";
 import MapWrapper from "@/components/Viewer/Map/MapWrapper";
 
-export type AirportConditionWithAirport = AirportCondition & { airport: Airport, };
-export type MappingJsonWithConditions = MappingJson & { airportCondition?: AirportConditionWithAirport, };
-export type AirportWithConditions = Airport & { conditions: AirportCondition[], };
-export type VideoMapWithMappings = VideoMap & { mappings: MappingJsonWithConditions[], };
-export type RadarFacilityWithSectors = RadarFacility & { sectors: SectorMappingWithConditions[], };
-export type SectorMappingWithConditions = SectorMapping & { mappings: MappingJsonWithConditions[], };
+export type AirportConditionWithAirport = AirportCondition & {
+  airport: Airport;
+};
+export type MappingJsonWithConditions = MappingJson & {
+  airportCondition?: AirportConditionWithAirport;
+};
+export type AirportWithConditions = Airport & {
+  conditions: AirportCondition[];
+};
+export type VideoMapWithMappings = VideoMap & {
+  mappings: MappingJsonWithConditions[];
+};
+export type RadarFacilityWithSectors = RadarFacility & {
+  sectors: SectorMappingWithConditions[];
+};
+export type SectorMappingWithConditions = SectorMapping & {
+  mappings: MappingJsonWithConditions[];
+};
 
 export default async function AirspaceViewer() {
+  const allAirports = await prisma.airport.findMany({
+    include: {
+      conditions: true,
+    },
+    orderBy: {
+      order: "asc",
+    },
+  });
 
-    const allAirports = await prisma.airport.findMany({
+  const allVideoMaps = await prisma.videoMap.findMany({
+    where: {
+      NOT: {
+        mappings: {
+          none: {},
+        },
+      },
+    },
+    include: {
+      mappings: {
         include: {
-            conditions: true,
-        },
-        orderBy: {
-            order: 'asc',
-        },
-    });
-
-    const allVideoMaps = await prisma.videoMap.findMany({
-        where: {
-            NOT: {
-                mappings: {
-                    none: {},
-                },
+          airportCondition: {
+            include: {
+              airport: true,
             },
+          },
         },
+      },
+    },
+    orderBy: {
+      order: "asc",
+    },
+  });
+
+  const allFacilities = await prisma.radarFacility.findMany({
+    include: {
+      sectors: {
         include: {
-            mappings: {
+          mappings: {
+            include: {
+              airportCondition: {
                 include: {
-                    airportCondition: {
-                        include: {
-                            airport: true,
-                        },
-                    },
+                  airport: true,
                 },
+              },
             },
+          },
         },
-        orderBy: {
-            order: 'asc',
-        },
-    });
-
-    const allFacilities = await prisma.radarFacility.findMany({
-        include: {
-            sectors: {
-                include: {
-                    mappings: {
-                        include: {
-                            airportCondition: {
-                                include: {
-                                    airport: true,
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        orderBy: {
-            order: 'asc',
-        },
-    });
+      },
+    },
+    orderBy: {
+      order: "asc",
+    },
+  });
 
     return (
         <Box>
