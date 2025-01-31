@@ -1,14 +1,14 @@
 'use server';
 
-import { NewMapping } from "@/components/Admin/MappingJson/MappingJsonForm";
+import {NewMapping} from "@/components/Admin/MappingJson/MappingJsonForm";
 import prisma from "@/lib/db";
-import { after } from "next/server";
-import { UTApi } from "uploadthing/server";
-import { log } from "./log";
-import { Prisma, SectorMapping } from "@prisma/client";
-import { z } from "zod";
-import { GridPaginationModel, GridSortModel, GridFilterItem } from "@mui/x-data-grid";
-import { revalidatePath } from "next/cache";
+import {after} from "next/server";
+import {UTApi} from "uploadthing/server";
+import {log} from "./log";
+import {Prisma, RadarFacility, SectorMapping} from "@prisma/client";
+import {z} from "zod";
+import {GridFilterItem, GridPaginationModel, GridSortModel} from "@mui/x-data-grid";
+import {revalidatePath} from "next/cache";
 
 const ut = new UTApi();
 
@@ -120,7 +120,7 @@ export const createOrUpdateSectorMapping = async (formData: FormData) => {
     }
 }
 
-export const fetchSectorMappings = async (pagination: GridPaginationModel, sort: GridSortModel, filter?: GridFilterItem) => {
+export const fetchSectorMappings = async (facility: RadarFacility, pagination: GridPaginationModel, sort: GridSortModel, filter?: GridFilterItem) => {
 
     const orderBy: Prisma.SectorMappingOrderByWithRelationInput = {};
 
@@ -130,25 +130,28 @@ export const fetchSectorMappings = async (pagination: GridPaginationModel, sort:
     
     return prisma.$transaction([
         prisma.sectorMapping.count({
-            where: getWhere(filter),
+            where: getWhere(facility, filter),
         }),
         prisma.sectorMapping.findMany({
             orderBy,
-            where: getWhere(filter),
+            where: getWhere(facility, filter),
             take: pagination.pageSize,
             skip: pagination.page * pagination.pageSize,
         })
     ]);
 }
 
-const getWhere = (filter?: GridFilterItem): Prisma.SectorMappingWhereInput => {
+const getWhere = (facility: RadarFacility, filter?: GridFilterItem): Prisma.SectorMappingWhereInput => {
     if (!filter) {
-        return {};
+        return {
+            radarFacilityId: facility.id,
+        };
     }
 
     switch (filter.field) {
         case 'name':
             return {
+                radarFacilityId: facility.id,
                 name: {
                     [filter.operator]: filter.value as string,
                     mode: 'insensitive',
@@ -156,13 +159,16 @@ const getWhere = (filter?: GridFilterItem): Prisma.SectorMappingWhereInput => {
             };
         case 'idsRadarSectorId':
             return {
+                radarFacilityId: facility.id,
                 idsRadarSectorId: {
                     [filter.operator]: filter.value as string,
                     mode: 'insensitive',
                 }
             };
         default:
-            return {};
+            return {
+                radarFacilityId: facility.id,
+            };
     }
 }
 

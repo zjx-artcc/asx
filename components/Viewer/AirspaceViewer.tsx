@@ -1,8 +1,11 @@
 import React from 'react';
 import {Airport, AirportCondition, MappingJson, RadarFacility, SectorMapping, VideoMap} from "@prisma/client";
 import prisma from "@/lib/db";
-import AirportConditionSelector from "@/components/Viewer/AirportConditionSelector";
-import {Card, CardContent, Grid2, Typography} from "@mui/material";
+import AirportConditionSelector from "@/components/Viewer/AirportCondition/AirportConditionSelector";
+import {Card, CardContent, Divider, Grid2, Typography} from "@mui/material";
+import VideoMapSelector from "@/components/Viewer/VideoMapSelector/VideoMapSelector";
+import FacilitySelector from "@/components/Viewer/FacilitySelector/FacilitySelector";
+import RenderMap from "@/components/Viewer/Map/RenderMap";
 
 export type AirportConditionWithAirport = AirportCondition & { airport: Airport, };
 export type MappingJsonWithConditions = MappingJson & { airportCondition?: AirportConditionWithAirport, };
@@ -75,8 +78,16 @@ export default async function AirspaceViewer() {
                     <Card>
                         <CardContent>
                             <Typography variant="h6" textAlign="center" gutterBottom>Airspace Explorer</Typography>
+                            <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
+                            <Divider sx={{my: 2,}}/>
+                            <FacilitySelector allFacilities={allFacilities as RadarFacilityWithSectors[]}/>
                         </CardContent>
                     </Card>
+                </Grid2>
+                <Grid2 size={8}>
+                    <RenderMap allConditions={allAirports.flatMap((a) => a.conditions) as AirportConditionWithAirport[]}
+                               allVideoMaps={allVideoMaps as VideoMapWithMappings[]}
+                               allFacilities={allFacilities as RadarFacilityWithSectors[]}/>
                 </Grid2>
             </Grid2>
         </>

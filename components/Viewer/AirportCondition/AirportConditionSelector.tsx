@@ -3,7 +3,7 @@ import React from 'react';
 import {AirportWithConditions} from "@/components/Viewer/AirspaceViewer";
 import {AppBar, Chip, Stack, Toolbar, Typography} from "@mui/material";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
-import AirportConditionAddButton from "@/components/Viewer/AirportConditionAddButton";
+import AirportConditionAddButton from "@/components/Viewer/AirportCondition/AirportConditionAddButton";
 import {AirportCondition} from "@prisma/client";
 
 export default function AirportConditionSelector({airports}: { airports: AirportWithConditions[], }) {
@@ -35,7 +35,8 @@ export default function AirportConditionSelector({airports}: { airports: Airport
                               label={`${getAirport(condition.id)?.icao || ''}/${condition.name}`}
                               onDelete={() => deleteCondition(condition)}/>
                     ))}
-                    {activeConditions.length === 0 && <Typography variant="subtitle1">No airport conditions selected</Typography>}
+                    {activeConditions.length === 0 &&
+                        <Typography variant="subtitle1">No airport conditions set.</Typography>}
                 </Stack>
             </Toolbar>
         </AppBar>

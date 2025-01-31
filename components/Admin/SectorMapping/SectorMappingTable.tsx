@@ -1,12 +1,12 @@
 'use client';
 
-import { GridColDef } from "@mui/x-data-grid";
-import { RadarFacility } from "@prisma/client";
-import DataTable, { containsOnlyFilterOperator, equalsOnlyFilterOperator } from "../DataTable/DataTable";
-import { toast } from "react-toastify";
+import {GridColDef} from "@mui/x-data-grid";
+import {RadarFacility} from "@prisma/client";
+import DataTable, {containsOnlyFilterOperator, equalsOnlyFilterOperator} from "../DataTable/DataTable";
+import {toast} from "react-toastify";
 import DeleteButton from "../GridButton/DeleteButton";
 import EditButton from "../GridButton/EditButton";
-import { deleteSectorMapping, fetchSectorMappings } from "@/actions/sectorMapping";
+import {deleteSectorMapping, fetchSectorMappings} from "@/actions/sectorMapping";
 
 export default function SectorMappingTable({ facility }: { facility: RadarFacility, }) {
 
@@ -37,7 +37,7 @@ export default function SectorMappingTable({ facility }: { facility: RadarFacili
 
     return (
         <DataTable columns={columns} fetchData={async (pagination, sort, filter) => {
-            const fetchedSectorMappings = await fetchSectorMappings(pagination, sort, filter);
+            const fetchedSectorMappings = await fetchSectorMappings(facility, pagination, sort, filter);
             return {data: fetchedSectorMappings[1], rowCount: fetchedSectorMappings[0]};
         }}/>
     )

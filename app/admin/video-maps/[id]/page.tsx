@@ -1,8 +1,8 @@
-import MappingJsonForm, { MappingJsonWithCondition } from "@/components/Admin/MappingJson/MappingJsonForm";
+import MappingJsonForm, {MappingJsonWithCondition} from "@/components/Admin/MappingJson/MappingJsonForm";
 import VideoMapForm from "@/components/Admin/VideoMap/VideoMapForm";
 import prisma from "@/lib/db";
-import { Box, Card, CardContent, Typography } from "@mui/material";
-import { notFound } from "next/navigation";
+import {Box, Card, CardContent, Typography} from "@mui/material";
+import {notFound} from "next/navigation";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
 
@@ -15,7 +15,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         include: {
             mappings: {
                 include: {
-                    airportCondition: true,
+                    airportCondition: {
+                        include: {
+                            airport: true,
+                        },
+                    },
                 },
             },
         },

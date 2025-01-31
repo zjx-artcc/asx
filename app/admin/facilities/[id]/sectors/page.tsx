@@ -1,10 +1,8 @@
 import SectorMappingTable from "@/components/Admin/SectorMapping/SectorMappingTable";
 import prisma from "@/lib/db";
-import { Reorder } from "@mui/icons-material";
-import { Add } from "@mui/icons-material";
-import { Button, Box, Card, CardContent, Link, Stack, Typography } from "@mui/material";
-import { RadarFacility } from "@prisma/client";
-import { notFound } from "next/navigation";
+import {Add} from "@mui/icons-material";
+import {Box, Button, Card, CardContent, Link, Stack, Typography} from "@mui/material";
+import {notFound} from "next/navigation";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
 
