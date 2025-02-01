@@ -6,8 +6,12 @@ import FacilityAddForm from "@/components/Viewer/FacilitySelector/FacilityAddFor
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import FacilityAccordion from "@/components/Viewer/FacilitySelector/FacilityAccordion";
 import {toast} from "react-toastify";
+import {IdsConsolidation} from "@/app/active-consolidations/page";
 
-export default function FacilitySelector({allFacilities}: { allFacilities: RadarFacilityWithSectors[] }) {
+export default function FacilitySelector({allFacilities, idsConsolidations,}: {
+    allFacilities: RadarFacilityWithSectors[],
+    idsConsolidations?: IdsConsolidation[],
+}) {
 
     const router = useRouter();
     const pathname = usePathname();
@@ -15,10 +19,17 @@ export default function FacilitySelector({allFacilities}: { allFacilities: Radar
     const [activeFacilities, setActiveFacilities] = React.useState<RadarFacilityWithSectors[]>([]);
 
     useEffect(() => {
+
+        if (idsConsolidations) {
+            const filteredFacilities = filterFacilitiesAndSectors(allFacilities, idsConsolidations.flatMap(consolidation => consolidation.primarySectorId));
+            setActiveFacilities(filteredFacilities);
+            return;
+        }
+
         const activeFacilityIds = searchParams.get('facilities')?.split(',') ?? [];
         const activeFacilities = allFacilities.filter(facility => activeFacilityIds.includes(facility.id));
         setActiveFacilities(activeFacilities);
-    }, [allFacilities, searchParams])
+    }, [allFacilities, searchParams, idsConsolidations])
 
     const onAddFacility = (facilityId: string) => {
         const newSearchParams = new URLSearchParams(searchParams);
@@ -46,12 +57,26 @@ export default function FacilitySelector({allFacilities}: { allFacilities: Radar
         <Box>
             <FacilityAddForm facilities={allFacilities} onSubmit={onAddFacility}/>
             <Divider sx={{my: 2,}}/>
-            <Typography variant="subtitle2" textAlign="center" gutterBottom>Selected Facilities</Typography>
+            <Typography variant="subtitle2" textAlign="center"
+                        gutterBottom>{idsConsolidations ? 'Online' : 'Selected'} Facilities</Typography>
             {activeFacilities.length === 0 &&
                 <Typography variant="subtitle1" textAlign="center">No facilities selected</Typography>}
             {activeFacilities.map(facility => (
-                <FacilityAccordion key={facility.id} facility={facility} onDelete={onDeleteFacility}/>
+                <FacilityAccordion key={facility.id} facility={facility} onDelete={onDeleteFacility}
+                                   disableDelete={!!idsConsolidations}/>
             ))}
         </Box>
     );
+}
+
+const filterFacilitiesAndSectors = (allFacilities: RadarFacilityWithSectors[], filterSectorIds: string[]) => {
+    return allFacilities
+        .filter((f) => f.sectors
+            .flatMap((s) => s.idsRadarSectorId)
+            .some((id) => filterSectorIds.includes(id)))
+        .map(facility => {
+            const sectors = facility.sectors
+                .filter(sector => filterSectorIds.includes(sector.idsRadarSectorId));
+            return {...facility, sectors};
+        });
 }

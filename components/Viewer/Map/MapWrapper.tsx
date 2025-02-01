@@ -11,11 +11,13 @@ import {useSearchParams} from "next/navigation";
 import {Card, CardContent, Stack, Typography} from "@mui/material";
 import {Info} from "@mui/icons-material";
 import Map from "@/components/Viewer/Map/Map";
+import {IdsConsolidation} from "@/app/active-consolidations/page";
 
-export default function MapWrapper({allConditions, allVideoMaps, allFacilities}: {
+export default function MapWrapper({allConditions, allVideoMaps, allFacilities, idsConsolidations,}: {
     allConditions: AirportConditionWithAirport[],
     allVideoMaps: VideoMapWithMappings[],
     allFacilities: RadarFacilityWithSectors[],
+    idsConsolidations?: IdsConsolidation[],
 }) {
 
     const searchParams = useSearchParams();
@@ -37,13 +39,27 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities}:
         setActiveVideoMap(videoMap);
 
         const sectorIds = searchParams.get('sectors')?.split(',') ?? [];
-        const sectors = allFacilities.flatMap(facility => facility.sectors).filter(sector => sectorIds.includes(sector.id));
+        const allSectors = allFacilities.flatMap(facility => facility.sectors);
+        const sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
+        if (idsConsolidations) {
+            idsConsolidations
+                .forEach(idsConsolidation => {
+                    if (!sectors.map(sector => sector.idsRadarSectorId).includes(idsConsolidation.primarySectorId)) {
+                        return;
+                    }
+                    const secondarySectors = [idsConsolidations[0], ...idsConsolidation.secondarySectorIds];
+                    const consolidatedSectors = allSectors
+                        .filter(sector => secondarySectors.includes(sector.idsRadarSectorId))
+                        .filter(sector => !sectors.includes(sector));
+                    sectors.push(...consolidatedSectors);
+                });
+        }
         setActiveSectors(sectors);
 
         const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
         const conditions = allConditions.filter(condition => conditionIds.includes(condition.id));
         setActiveConditions(conditions);
-    }, [searchParams, allVideoMaps, allFacilities, allConditions]);
+    }, [searchParams, allVideoMaps, allFacilities, allConditions, idsConsolidations]);
 
     if (!activeVideoMap) {
         return (
@@ -55,7 +71,8 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities}:
                     </Stack>
                     <Typography gutterBottom>Select a video map and start adding facilities to visualize the
                         airspace.</Typography>
-                    <Typography variant="subtitle2">NOTE: A majority of sectors and video maps require an airspace
+                    <Typography variant="subtitle2">NOTE: A majority of TRACON/RAPCON sectors and video maps require an
+                        airspace
                         condition to be set prior to enabling them. Add an airspace condition above by pressing the +
                         button.</Typography>
                 </CardContent>
@@ -109,6 +126,12 @@ const getJsons = (videoMap: VideoMapWithMappings | null, sectors: SectorMappingW
     const sectorJsons: MappingJsonWithConditions[] = [];
 
     for (const sector of sectors) {
+
+        if (sector.mappings.length === 0) {
+            errors.push(`Sector ${sector.name} has no GEOJSON mappings.`);
+            continue;
+        }
+
         const sectorJson = getBestMapping(sector.mappings, conditions);
 
         if (Array.isArray(sectorJson)) {

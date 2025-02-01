@@ -1,17 +1,15 @@
 'use server';
 
 import prisma from "@/lib/db";
-import { GridFilterItem, GridSortModel } from "@mui/x-data-grid";
-
-import { GridPaginationModel } from "@mui/x-data-grid";
-import { Prisma, VideoMap } from "@prisma/client";
-import { after } from "next/server";
-import { log } from "./log";
-import { OrderItem } from "@/components/Admin/Order/OrderList";
-import z, { map } from "zod";
-import { revalidatePath } from "next/cache";
-import { NewMapping } from "@/components/Admin/MappingJson/MappingJsonForm";
-import { UTApi } from "uploadthing/server";
+import {GridFilterItem, GridPaginationModel, GridSortModel} from "@mui/x-data-grid";
+import {Prisma, VideoMap} from "@prisma/client";
+import {after} from "next/server";
+import {log} from "./log";
+import {OrderItem} from "@/components/Admin/Order/OrderList";
+import z from "zod";
+import {revalidatePath} from "next/cache";
+import {NewMapping} from "@/components/Admin/MappingJson/MappingJsonForm";
+import {UTApi} from "uploadthing/server";
 
 const ut = new UTApi();
 
@@ -58,6 +56,7 @@ export const deleteVideoMap = async (id: string) => {
         },
     });
 
+    revalidatePath('/admin/video-maps');
 
     after(async () => {
         await ut.deleteFiles(vm.mappings.map(mj => mj.jsonKey));

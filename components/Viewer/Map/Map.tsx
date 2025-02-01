@@ -1,31 +1,33 @@
 'use client';
 import React from 'react';
-import {Box, Card, CardContent, Typography} from "@mui/material";
-
+import {Box, Card, CardContent} from "@mui/material";
 import LeafletMap from "@/components/Map/Map";
 import Geojson from "@/components/GeoJSON/GeoJSON";
 import northPCT from "@/public/northMerged.json";
 
 export default function Map({videoMapKey, sectorKeys}: { videoMapKey: string, sectorKeys: string[] }) {
 
+    console.log('videoMapKey', videoMapKey);
+    console.log('sectorKeys', sectorKeys);
 
     return (
-        <Card sx={{height: '100%', position: "relative"}}>
-            <CardContent>
-                <Typography variant="h5" gutterBottom>RENDER MAP HERE</Typography>
-                <Typography variant="subtitle1">VIDEO MAP KEY: {videoMapKey}</Typography>
-                <Typography variant="subtitle2">SECTOR KEY(S): {sectorKeys.join('\n')}</Typography>
-                <Box>
+        <Card sx={{height: '100%', display: 'flex', flexDirection: 'column'}}>
+            <CardContent sx={{flex: '1 1 auto',}}>
+                <Box sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    flex: '1 1 auto',
+                }}>
                     <LeafletMap
-                        style={{
-                            // display: "flex",
-                            width: "100%",
-                            height: "100%",
-                            position:"absolute"
-                        }}
                         zoomSnap={0.1}
-                        center={[39, -77]}
+                        center={[0, 0]}
                         zoom={9.5}
+                        style={{
+                            position: 'absolute',
+                            width: '100%',
+                            height: '100%',
+                        }}
                     >
                         <Geojson
                             key={videoMapKey}
@@ -33,7 +35,7 @@ export default function Map({videoMapKey, sectorKeys}: { videoMapKey: string, se
                             style={{ weight: 1 }}
                             interactive={false}
                         />
-                </LeafletMap>
+                    </LeafletMap>
                 </Box>
             </CardContent>
         </Card>

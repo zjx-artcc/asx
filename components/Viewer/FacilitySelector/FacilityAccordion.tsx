@@ -6,9 +6,10 @@ import {Delete, ExpandMore} from "@mui/icons-material";
 import SectorCheckboxes from "@/components/Viewer/FacilitySelector/SectorCheckboxes";
 import {useSearchParams} from "next/navigation";
 
-export default function FacilityAccordion({facility, onDelete}: {
+export default function FacilityAccordion({facility, onDelete, disableDelete,}: {
     facility: RadarFacilityWithSectors,
     onDelete: (facilityId: string) => void,
+    disableDelete?: boolean,
 }) {
 
     const searchParams = useSearchParams();
@@ -26,7 +27,7 @@ export default function FacilityAccordion({facility, onDelete}: {
                 <Stack direction="row" spacing={1} alignItems="center">
                     <Typography>{facility.name} ({activeSectors.length}/{facility.sectors.length})</Typography>
                     <Box>
-                        <IconButton onClick={() => onDelete(facility.id)} size="small">
+                        <IconButton disabled={disableDelete} onClick={() => onDelete(facility.id)} size="small">
                             <Delete/>
                         </IconButton>
                     </Box>

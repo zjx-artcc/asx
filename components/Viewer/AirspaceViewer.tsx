@@ -1,18 +1,12 @@
 import React from "react";
-import {
-  Airport,
-  AirportCondition,
-  MappingJson,
-  RadarFacility,
-  SectorMapping,
-  VideoMap,
-} from "@prisma/client";
+import {Airport, AirportCondition, MappingJson, RadarFacility, SectorMapping, VideoMap,} from "@prisma/client";
 import prisma from "@/lib/db";
 import AirspaceConditionSelector from "@/components/Viewer/AirspaceCondition/AirspaceConditionSelector";
 import {Box, Card, CardContent, Divider, Grid2, Typography} from "@mui/material";
 import VideoMapSelector from "@/components/Viewer/VideoMapSelector/VideoMapSelector";
 import FacilitySelector from "@/components/Viewer/FacilitySelector/FacilitySelector";
 import MapWrapper from "@/components/Viewer/Map/MapWrapper";
+import {IdsConsolidation} from "@/app/active-consolidations/page";
 
 export type AirportConditionWithAirport = AirportCondition & {
   airport: Airport;
@@ -33,7 +27,7 @@ export type SectorMappingWithConditions = SectorMapping & {
   mappings: MappingJsonWithConditions[];
 };
 
-export default async function AirspaceViewer() {
+export default async function AirspaceViewer({idsConsolidations}: { idsConsolidations?: IdsConsolidation[], }) {
   const allAirports = await prisma.airport.findMany({
     include: {
       conditions: true,
@@ -101,7 +95,8 @@ export default async function AirspaceViewer() {
                             <Divider sx={{my: 2,}}/>
                             <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
                             <Divider sx={{my: 2,}}/>
-                            <FacilitySelector allFacilities={allFacilities as RadarFacilityWithSectors[]}/>
+                            <FacilitySelector allFacilities={allFacilities as RadarFacilityWithSectors[]}
+                                              idsConsolidations={idsConsolidations}/>
                         </CardContent>
                     </Card>
                 </Grid2>
@@ -109,7 +104,9 @@ export default async function AirspaceViewer() {
                     <MapWrapper
                         allConditions={allAirports.flatMap((a) => a.conditions) as AirportConditionWithAirport[]}
                         allVideoMaps={allVideoMaps as VideoMapWithMappings[]}
-                        allFacilities={allFacilities as RadarFacilityWithSectors[]}/>
+                        allFacilities={allFacilities as RadarFacilityWithSectors[]}
+                        idsConsolidations={idsConsolidations}
+                    />
                 </Grid2>
             </Grid2>
         </Box>
