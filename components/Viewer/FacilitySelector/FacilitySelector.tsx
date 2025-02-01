@@ -55,8 +55,10 @@ export default function FacilitySelector({allFacilities, idsConsolidations,}: {
 
     return (
         <Box>
-            <FacilityAddForm facilities={allFacilities} onSubmit={onAddFacility}/>
-            <Divider sx={{my: 2,}}/>
+            {!idsConsolidations && <>
+                <FacilityAddForm facilities={allFacilities} onSubmit={onAddFacility}/>
+                <Divider sx={{my: 2,}}/>
+            </>}
             <Typography variant="subtitle2" textAlign="center"
                         gutterBottom>{idsConsolidations ? 'Online' : 'Selected'} Facilities</Typography>
             {activeFacilities.length === 0 &&

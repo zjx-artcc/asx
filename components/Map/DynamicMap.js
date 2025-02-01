@@ -1,10 +1,6 @@
 import * as ReactLeaflet from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
-
-
-import { TileLayer } from "react-leaflet/TileLayer";
-
 const { MapContainer } = ReactLeaflet;
 
 const Map = ({ children, ...rest }) => {

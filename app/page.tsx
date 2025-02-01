@@ -21,7 +21,8 @@ export default function Home() {
                 </CardMedia>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>Active Radar Consolidations</Typography>
-                  <Typography>See the current radar splits vZDC is using. Accuracy is not guarenteed.</Typography>
+                  <Typography>See the current radar splits vZDC is using. Accuracy is not guaranteed unless explicitly
+                    communicated through official mediums.</Typography>
                 </CardContent>
               </CardActionArea>
             </Card>
