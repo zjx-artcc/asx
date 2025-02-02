@@ -5,6 +5,7 @@ import LeafletMap from "@/components/Map/Map";
 import Geojson from "@/components/GeoJSON/GeoJSON";
 import "leaflet/dist/leaflet.css";
 import {useColorScheme} from "@mui/material/styles";
+import Tooltips from "@/components/Tooltips/Tooltips";
 
 type GeoJSONWithColor = {
     key: string,
@@ -107,6 +108,8 @@ export default function Map({videoMapKeys, sectorKeys, colorProviders,}: {
                                 interactive={false}
                             />
                         ))}
+
+                        <Tooltips sectors={files}/>
                     </LeafletMap>
                 </Box>
             </CardContent>
