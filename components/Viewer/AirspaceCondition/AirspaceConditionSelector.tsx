@@ -1,12 +1,12 @@
 'use client';
 import React from 'react';
-import {AirportWithConditions} from "@/components/Viewer/AirspaceViewer";
+import {AirspaceContainerWithConditions} from "@/components/Viewer/AirspaceViewer";
 import {Chip, Paper, Stack, Typography} from "@mui/material";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import AirspaceConditionAddButton from "@/components/Viewer/AirspaceCondition/AirspaceConditionAddButton";
-import {AirportCondition} from "@prisma/client";
+import {AirspaceCondition} from "@prisma/client";
 
-export default function AirspaceConditionSelector({airports}: { airports: AirportWithConditions[], }) {
+export default function AirspaceConditionSelector({airports}: { airports: AirspaceContainerWithConditions[], }) {
 
     const router = useRouter();
     const pathname = usePathname();
@@ -18,7 +18,7 @@ export default function AirspaceConditionSelector({airports}: { airports: Airpor
         return airports.find(airport => airport.conditions.some(condition => condition.id.toString() === conditionId));
     }
 
-    const deleteCondition = (condition: AirportCondition) => {
+    const deleteCondition = (condition: AirspaceCondition) => {
         const newSearchParams = new URLSearchParams(searchParams);
         const activeConditionIds = newSearchParams.get('conditions')?.split(',') ?? [];
         newSearchParams.set('conditions', activeConditionIds.filter(id => id !== condition.id.toString()).join(','));
@@ -28,11 +28,11 @@ export default function AirspaceConditionSelector({airports}: { airports: Airpor
     return (
         <Paper sx={{p: 0.5,}}>
             <Stack direction="row" spacing={1} alignItems="center">
-                <AirspaceConditionAddButton allAirports={airports}/>
+                <AirspaceConditionAddButton allContainers={airports}/>
                 <Stack direction="row" spacing={1} sx={{overflowX: 'auto',}}>
                     {activeConditions.map(condition => (
                         <Chip key={condition.id} size="small"
-                              label={`${getAirport(condition.id)?.icao || ''}/${condition.name}`}
+                              label={`${getAirport(condition.id)?.name || ''}/${condition.name}`}
                               onDelete={() => deleteCondition(condition)}/>
                     ))}
                     {activeConditions.length === 0 &&

@@ -9,18 +9,18 @@ import {OrderItem} from "@/components/Admin/Order/OrderList";
 import {z} from "zod";
 import {revalidatePath} from "next/cache";
 
-export const fetchAirports = async (pagination: GridPaginationModel, sort: GridSortModel, filter?: GridFilterItem) => {
-    const orderBy: Prisma.AirportOrderByWithRelationInput = {};
+export const fetchAirspaceContainers = async (pagination: GridPaginationModel, sort: GridSortModel, filter?: GridFilterItem) => {
+    const orderBy: Prisma.AirspaceConditionContainerOrderByWithRelationInput = {};
 
     if (sort.length > 0) {
-        orderBy[sort[0].field as keyof Prisma.AirportOrderByWithRelationInput] = sort[0].sort === 'asc' ? 'asc' : 'desc';
+        orderBy[sort[0].field as keyof Prisma.AirspaceConditionContainerOrderByWithRelationInput] = sort[0].sort === 'asc' ? 'asc' : 'desc';
     }
 
     return prisma.$transaction([
-        prisma.airport.count({
+        prisma.airspaceConditionContainer.count({
             where: getWhere(filter),
         }),
-        prisma.airport.findMany({
+        prisma.airspaceConditionContainer.findMany({
             orderBy,
             where: getWhere(filter),
             take: pagination.pageSize,
@@ -32,15 +32,15 @@ export const fetchAirports = async (pagination: GridPaginationModel, sort: GridS
     ]);
 }
 
-const getWhere = (filter?: GridFilterItem): Prisma.AirportWhereInput => {
+const getWhere = (filter?: GridFilterItem): Prisma.AirspaceConditionContainerWhereInput => {
     if (!filter) {
         return {};
     }
 
     switch (filter.field) {
-        case 'icao':
+        case 'name':
             return {
-                icao: {
+                name: {
                     [filter.operator]: filter.value as string,
                     mode: 'insensitive',
                 }
@@ -61,8 +61,8 @@ const getWhere = (filter?: GridFilterItem): Prisma.AirportWhereInput => {
     }
 }
 
-export const deleteAirport = async (id: string) => {
-    const airport = await prisma.airport.delete({
+export const deleteAirspaceContainer = async (id: string) => {
+    const acc = await prisma.airspaceConditionContainer.delete({
         where: {
             id,
         },
@@ -71,13 +71,13 @@ export const deleteAirport = async (id: string) => {
     revalidatePath('/admin/airports');
 
     after(async () => {
-        await log('DELETE', 'AIRPORT', `Deleted airport ${airport.icao}`);
+        await log('DELETE', 'AIRSPACE_CONDITION_CONTAINER', `Deleted container ${acc.name}`);
     });
 }
 
-export const updateAirportOrder = async (items: OrderItem[]) => {
+export const updateAirspaceContainerOrder = async (items: OrderItem[]) => {
     for (const item of items) {
-        await prisma.airport.update({
+        await prisma.airspaceConditionContainer.update({
             where: {
                 id: item.id,
             },
@@ -88,21 +88,21 @@ export const updateAirportOrder = async (items: OrderItem[]) => {
     }
 
     after(async () => {
-        await log('UPDATE', 'AIRPORT', 'Updated airport order');
+        await log('UPDATE', 'AIRSPACE_CONDITION_CONTAINER', 'Updated container order');
     });
 }
 
-export const createOrUpdateAirport = async (data: FormData) => {
+export const createOrUpdateAirspaceContainer = async (data: FormData) => {
 
     const airportZ = z.object({
         id: z.string().optional(),
-        icao: z.string().nonempty("ICAO is required"),
+        name: z.string().nonempty("Name is required"),
         conditions: z.array(z.string()).nonempty("Conditions are required"),
     });
 
     const result = airportZ.safeParse({
         id: data.get('id') as string,
-        icao: data.get('icao') as string,
+        name: data.get('name') as string,
         conditions: (data.get('conditions') as string)?.split(',').map((c) => c.trim()) || [],
     });
 
@@ -113,17 +113,17 @@ export const createOrUpdateAirport = async (data: FormData) => {
     if (result.data.id) {
 
         // Get current conditions
-        const currentConditions = await prisma.airportCondition.findMany({
+        const currentConditions = await prisma.airspaceCondition.findMany({
             where: {
-                airportId: result.data.id,
+                containerId: result.data.id,
             },
         });
 
         // Delete only conditions that are not in the new list
-        await prisma.airportCondition.deleteMany({
+        await prisma.airspaceCondition.deleteMany({
             where: {
                 AND: [
-                    { airportId: result.data.id },
+                    {containerId: result.data.id},
                     { name: { notIn: result.data.conditions } }
                 ]
             },
@@ -131,13 +131,13 @@ export const createOrUpdateAirport = async (data: FormData) => {
 
         // Get existing condition names to avoid duplicates
         const existingConditionNames = currentConditions.map(c => c.name);
-        
-        const airport = await prisma.airport.update({
+
+        const container = await prisma.airspaceConditionContainer.update({
             where: {
                 id: result.data.id,
             },
             data: {
-                icao: result.data.icao,
+                name: result.data.name,
                 conditions: {
                     create: result.data.conditions
                         .filter(name => !existingConditionNames.includes(name))
@@ -150,16 +150,16 @@ export const createOrUpdateAirport = async (data: FormData) => {
         });
 
         after(async () => {
-            await log('UPDATE', 'AIRPORT', `Updated airport ${airport.icao}`);
+            await log('UPDATE', 'AIRSPACE_CONDITION_CONTAINER', `Updated container ${container.name}`);
         });
 
-        revalidatePath(`/admin/airports/${airport.id}`);
+        revalidatePath(`/admin/airports/${container.id}`);
 
-        return { airport };
+        return {airport: container};
     } else {
-        const airport = await prisma.airport.create({
+        const container = await prisma.airspaceConditionContainer.create({
             data: {
-                icao: result.data.icao,
+                name: result.data.name,
                 conditions: {
                     create: result.data.conditions.map((c) => ({ name: c })),
                 },
@@ -170,10 +170,10 @@ export const createOrUpdateAirport = async (data: FormData) => {
         });
 
         after(async () => {
-            await log('CREATE', 'AIRPORT', `Created airport ${airport.icao}`);
+            await log('CREATE', 'AIRSPACE_CONDITION_CONTAINER', `Created airport ${container.name}`);
         });
 
-        return { airport };
+        return {container,};
     }
 
 }

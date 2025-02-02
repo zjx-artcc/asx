@@ -1,35 +1,83 @@
 'use client';
-import React from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {Box, Card, CardContent} from "@mui/material";
 import LeafletMap from "@/components/Map/Map";
 import Geojson from "@/components/GeoJSON/GeoJSON";
-import northPCT from "@/public/northMerged.json";
-import southPCT from "@/public/southMerged.json";
-import centerMap from "@/public/center_boundary.json";
 
-import {ShdSectors} from "@/components/Sectors/Sectors";
+type GeoJSONWithColor = {
+    key: string,
+    // noinspection @typescript-eslint/ no-explicit-any
+    json: {
+        crs: {
+            properties: {
+                color: string,
+            },
+        },
+    },
+    color: string,
+};
 
-export default function Map({videoMapKey, sectorKeys}: { videoMapKey: string, sectorKeys: string[] }) {
+export default function Map({videoMapKey, sectorKeys, colorProviders,}: {
+    videoMapKey: string,
+    sectorKeys: string[],
+    colorProviders: { // noinspection JSUnusedLocalSymbols
+        [key: string]: string,
+    },
+}) {
 
-    console.log('videoMapKey', videoMapKey);
-    console.log('sectorKeys', sectorKeys);
-    const [baseMap, setBaseMap] = React.useState(southPCT);
-    const [center, setCenter] = React.useState([39,-77]);
-    const [zoom, setZoom] = React.useState(9);
+    const [files, setFiles] = React.useState<GeoJSONWithColor[]>([]);
 
+    const fetchJson = async (key: string) => {
+        const res = await fetch(`https://utfs.io/f/${key}`);
+        return await res.json();
+    }
 
-    React.useEffect(()=>{
-        // console.log(videoMapKey==="4LL8Da7DF6qX7DZRcSOUvlGudXZqJxVeFnNSW365izyDp0tw");
-        if(videoMapKey==="4LL8Da7DF6qX7DZRcSOUvlGudXZqJxVeFnNSW365izyDp0tw"){
-            setBaseMap(southPCT);
-        }else if(videoMapKey==="4LL8Da7DF6qXQSgakmj1UxQM3i9Ks04othLf7anjYIvWF6Rd"){
-            setBaseMap(northPCT);
-        }else if(videoMapKey==="4LL8Da7DF6qXiO17sUY4NbGeRqUMgc3PBKV8EuwpHSh0Xs6D"){
-            setBaseMap(centerMap);
-            setZoom(7.5);
-            setCenter([38, -76]);
+    const getColor = useCallback((file: GeoJSONWithColor, all: GeoJSONWithColor[]): string => {
+        const colorProviderKey = colorProviders[file.key];
+
+        if (colorProviderKey === file.key) {
+            return file.json?.crs?.properties?.color || 'black';
         }
-    },[videoMapKey])
+
+        let color = file.json?.crs?.properties?.color;
+
+        if (colorProviderKey) {
+            const colorProviderFile = all.find((file) => file.key === colorProviderKey);
+            color = colorProviderFile?.json?.crs?.properties?.color || 'black';
+        }
+
+        return color || 'black';
+    }, [colorProviders]);
+
+    useEffect(() => {
+        const fetchAll = async () => {
+            if (sectorKeys.length === 0) {
+                const videoFile = await fetchJson(videoMapKey);
+                return [{
+                    key: videoMapKey,
+                    json: videoFile,
+                    color: videoFile?.crs?.properties?.color || 'black'
+                }] satisfies GeoJSONWithColor[];
+            }
+
+            const files = await Promise.all(sectorKeys.map(fetchJson));
+            const videoFile = await fetchJson(videoMapKey);
+            return [{
+                key: videoMapKey,
+                json: videoFile,
+                color: videoFile?.crs?.properties?.color || 'black'
+            }, ...files.map((json, index) => ({
+                key: sectorKeys[index],
+                json,
+                color: json.crs.properties.color || 'black'
+            }))] satisfies GeoJSONWithColor[];
+        }
+
+        fetchAll().then((files) => {
+            setFiles(files.map((file) => ({...file, color: getColor(file, files)})));
+        });
+
+    }, [videoMapKey, sectorKeys, getColor]);
 
     return (
         <Card sx={{height: '100%', display: 'flex', flexDirection: 'column'}}>
@@ -42,23 +90,22 @@ export default function Map({videoMapKey, sectorKeys}: { videoMapKey: string, se
                 }}>
                     <LeafletMap
                         zoomSnap={0.1}
-                        center={center}
-                        zoom={zoom}
+                        center={[0, 0]}
+                        zoom={9}
                         style={{
                             position: 'absolute',
                             width: '100%',
                             height: '100%',
                         }}
                     >
-                        <Geojson
-                            key={videoMapKey}
-                            data={baseMap}
-                            style={{ weight: 1 }}
-                            interactive={false}
-                        />
-
-                        <ShdSectors sectorKeys={sectorKeys}/>
-
+                        {files.map((file) => (
+                            <Geojson
+                                key={file.key}
+                                data={file.json}
+                                style={{weight: 1, color: file.color}}
+                                interactive={false}
+                            />
+                        ))}
                     </LeafletMap>
                 </Box>
             </CardContent>

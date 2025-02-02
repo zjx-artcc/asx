@@ -7,8 +7,8 @@ export default async function Page() {
     const videoMaps = await prisma.videoMap.count();
     const mappings = await prisma.sectorMapping.count();
     const jsonFiles = await prisma.mappingJson.count();
-    const airports = await prisma.airport.count();
-    const airportConditions = await prisma.airportCondition.count();
+    const containers = await prisma.airspaceConditionContainer.count();
+    const airspaceConditions = await prisma.airspaceCondition.count();
 
     return (
         <Stack direction="column" spacing={2}>
@@ -34,12 +34,12 @@ export default async function Page() {
             </Card>
             <Card>
                 <CardContent>
-                    <Typography variant="h6">{airports} airport(s) configured.</Typography>
+                    <Typography variant="h6">{containers} airspace condition container(s) configured.</Typography>
                 </CardContent>
             </Card>
             <Card>
                 <CardContent>
-                    <Typography variant="h6">{airportConditions} airport condition(s) configured.</Typography>
+                    <Typography variant="h6">{airspaceConditions} airspace condition(s) configured.</Typography>
                 </CardContent>
             </Card>
         </Stack>

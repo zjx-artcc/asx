@@ -1,7 +1,7 @@
 'use client';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
-    AirportConditionWithAirport,
+    AirspaceConditionWithContainer,
     MappingJsonWithConditions,
     RadarFacilityWithSectors,
     SectorMappingWithConditions,
@@ -14,33 +14,25 @@ import Map from "@/components/Viewer/Map/Map";
 import {IdsConsolidation} from "@/app/active-consolidations/page";
 
 export default function MapWrapper({allConditions, allVideoMaps, allFacilities, idsConsolidations,}: {
-    allConditions: AirportConditionWithAirport[],
+    allConditions: AirspaceConditionWithContainer[],
     allVideoMaps: VideoMapWithMappings[],
     allFacilities: RadarFacilityWithSectors[],
     idsConsolidations?: IdsConsolidation[],
 }) {
 
     const searchParams = useSearchParams();
-    const [activeVideoMap, setActiveVideoMap] = useState<VideoMapWithMappings | null>(null);
-    const [activeSectors, setActiveSectors] = useState<SectorMappingWithConditions[]>([]);
-    const [activeConditions, setActiveConditions] = useState<AirportConditionWithAirport[]>([]);
 
-    useEffect(() => {
-        const videoMapId = searchParams.get('videoMap');
-        if (!videoMapId) {
-            setActiveVideoMap(null);
-            return;
-        }
-        const videoMap = allVideoMaps.find(videoMap => videoMap.id === videoMapId);
-        if (!videoMap) {
-            setActiveVideoMap(null);
-            return;
-        }
-        setActiveVideoMap(videoMap);
+    const videoMapId = searchParams.get('videoMap');
+    const videoMap = allVideoMaps.find(videoMap => videoMap.id === videoMapId);
 
-        const sectorIds = searchParams.get('sectors')?.split(',') ?? [];
+
+    const sectorIds = searchParams.get('sectors')?.split(',').filter((i) => !!i) ?? [];
+
+    let sectors: SectorMappingWithConditions[] = [];
+
+    if (sectorIds.length > 0) {
         const allSectors = allFacilities.flatMap(facility => facility.sectors);
-        const sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
+        sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
         if (idsConsolidations) {
             idsConsolidations
                 .forEach(idsConsolidation => {
@@ -54,14 +46,12 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
                     sectors.push(...consolidatedSectors);
                 });
         }
-        setActiveSectors(sectors);
+    }
 
-        const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
-        const conditions = allConditions.filter(condition => conditionIds.includes(condition.id));
-        setActiveConditions(conditions);
-    }, [searchParams, allVideoMaps, allFacilities, allConditions, idsConsolidations]);
+    const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
+    const conditions = allConditions.filter(condition => conditionIds.includes(condition.id));
 
-    if (!activeVideoMap) {
+    if (!videoMap) {
         return (
             <Card>
                 <CardContent>
@@ -80,9 +70,9 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         )
     }
 
-    const {errors, videoJson, sectorJsons,} = getJsons(activeVideoMap, activeSectors, activeConditions);
+    const jsons = getJsons(videoMap, sectors, conditions);
 
-    if (errors) {
+    if (jsons.errors) {
         return (
             <Card>
                 <CardContent>
@@ -92,20 +82,36 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
                     </Stack>
                     <Typography variant="subtitle1" gutterBottom>The map could not be rendered for the following
                         reasons:</Typography>
-                    {errors.map((error, idx) => <Typography key={idx} variant="subtitle2"
+                    {jsons.errors.map((error, idx) => <Typography key={idx} variant="subtitle2"
                                                             gutterBottom>{error}</Typography>)}
                 </CardContent>
             </Card>
         );
     }
 
-    return videoJson && sectorJsons && (
-        <Map videoMapKey={videoJson.jsonKey} sectorKeys={sectorJsons.map(sj => sj.jsonKey)}/>
+    const colorProviders: { [key: string]: string, } = {};
+
+    for (const json of jsons?.sectorJsons || []) {
+        colorProviders[json.jsonKey] = json.jsonKey;
+    }
+
+    if (idsConsolidations) {
+        for (const idsConsolidation of idsConsolidations) {
+            colorProviders[idsConsolidation.primarySectorId] = idsConsolidation.primarySectorId;
+            for (const secondarySectorId of idsConsolidation.secondarySectorIds) {
+                colorProviders[secondarySectorId] = idsConsolidation.primarySectorId;
+            }
+        }
+    }
+
+    return jsons?.videoJson && jsons?.sectorJsons && (
+        <Map videoMapKey={jsons.videoJson.jsonKey} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
+             colorProviders={colorProviders}/>
     );
 
 }
 
-const getJsons = (videoMap: VideoMapWithMappings | null, sectors: SectorMappingWithConditions[], conditions: AirportConditionWithAirport[]): {
+const getJsons = (videoMap: VideoMapWithMappings | null, sectors: SectorMappingWithConditions[], conditions: AirspaceConditionWithContainer[]): {
     errors?: string[],
     videoJson?: MappingJsonWithConditions,
     sectorJsons?: MappingJsonWithConditions[],
@@ -149,19 +155,19 @@ const getJsons = (videoMap: VideoMapWithMappings | null, sectors: SectorMappingW
     return {videoJson: videoJson as MappingJsonWithConditions, sectorJsons};
 }
 
-const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditions: AirportConditionWithAirport[]): MappingJsonWithConditions | string[] => {
+const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditions: AirspaceConditionWithContainer[]): MappingJsonWithConditions | string[] => {
 
     const conditionIds = conditions.map(c => c.id);
     let undefinedMapping: MappingJsonWithConditions | null = null;
 
     for (const mapping of availableMappings) {
 
-        if (!mapping.airportConditionId) {
+        if (!mapping.airspaceConditionId) {
             undefinedMapping = mapping;
             continue;
         }
 
-        if (conditionIds.includes(mapping.airportConditionId)) {
+        if (conditionIds.includes(mapping.airspaceConditionId)) {
             return mapping;
         }
     }
@@ -171,7 +177,7 @@ const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditio
     }
 
     return availableMappings
-        .map(m => m.airportCondition?.airport)
-        .filter(a => !!a).map(a => a.icao)
+        .map(m => m.airportCondition?.container)
+        .filter(a => !!a).map(a => a.name)
         .filter((airport, index, self) => self.indexOf(airport) === index);
 }

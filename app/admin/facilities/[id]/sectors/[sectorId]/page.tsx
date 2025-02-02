@@ -1,10 +1,8 @@
-import AirportForm from "@/components/Admin/Airport/AirportForm";
-import MappingJsonForm, { MappingJsonWithCondition } from "@/components/Admin/MappingJson/MappingJsonForm";
+import MappingJsonForm, {MappingJsonWithCondition} from "@/components/Admin/MappingJson/MappingJsonForm";
 import SectorMappingForm from "@/components/Admin/SectorMapping/SectorMappingForm";
 import prisma from "@/lib/db";
-import { Box, Card, CardContent, Typography } from "@mui/material";
-import { SectorMapping } from "@prisma/client";
-import { notFound } from "next/navigation";
+import {Box, Card, CardContent, Typography} from "@mui/material";
+import {notFound} from "next/navigation";
 
 export default async function Page({ params }: { params: Promise<{ id: string, sectorId: string }>}) {
 
@@ -18,9 +16,9 @@ export default async function Page({ params }: { params: Promise<{ id: string, s
             radarFacility: true,
             mappings: {
                 include: {
-                    airportCondition: {
+                    airspaceCondition: {
                         include: {
-                            airport: true,
+                            container: true,
                         },
                     },
                 },
@@ -32,12 +30,12 @@ export default async function Page({ params }: { params: Promise<{ id: string, s
         notFound();
     }
 
-    const allConditions = await prisma.airportCondition.findMany({
+    const allConditions = await prisma.airspaceCondition.findMany({
         include: {
-            airport: true,
+            container: true,
         },
         orderBy: {
-            airport: {
+            container: {
                 order: 'asc',
             },
         },

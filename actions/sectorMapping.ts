@@ -38,7 +38,7 @@ export const updateSectorMappingJsons = async (deleteIds: string[], newMappings:
 
         const mj = await prisma.mappingJson.create({
             data: {
-                airportConditionId: mapping.airportConditionId,
+                airspaceConditionId: mapping.airspaceConditionId,
                 sectorMappingId: mapping.sectorMappingId,
                 jsonKey: res.data.key,
             },

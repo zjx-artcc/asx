@@ -96,9 +96,9 @@ model SectorMapping {
 model MappingJson {
   id String @id @default(cuid())
 
-  jsonKey            String
-  airportCondition   AirportCondition? @relation(fields: [airportConditionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  airportConditionId String?
+  jsonKey             String
+  airspaceCondition   AirspaceCondition? @relation(fields: [airspaceConditionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  airspaceConditionId String?
 
   sectorMapping   SectorMapping? @relation(fields: [sectorMappingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   sectorMappingId String?
@@ -106,24 +106,24 @@ model MappingJson {
   videoMap   VideoMap? @relation(fields: [videoMapId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   videoMapId String?
 
-  @@unique([sectorMappingId, videoMapId, airportConditionId])
+  @@unique([sectorMappingId, videoMapId, airspaceConditionId])
 }
 
-model Airport {
-  id         String             @id @default(cuid())
-  icao       String             @unique
-  conditions AirportCondition[]
+model AirspaceConditionContainer {
+  id         String              @id @default(cuid())
+  name       String              @unique
+  conditions AirspaceCondition[]
 
   order Int @default(0)
 }
 
-model AirportCondition {
+model AirspaceCondition {
   id String @id @default(cuid())
 
   name String
 
-  airport   Airport @relation(fields: [airportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  airportId String
+  container   AirspaceConditionContainer @relation(fields: [containerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  containerId String
 
   mappings MappingJson[]
 }
@@ -137,8 +137,8 @@ enum LogType {
 enum LogModel {
   VIDEO_MAP
   SECTOR_MAPPING
-  AIRPORT
-  AIRPORT_CONDITION
+  AIRSPACE_CONDITION_CONTAINER
+  AIRSPACE_CONDITION
   RADAR_FACILITY
 }
 

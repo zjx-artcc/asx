@@ -1,33 +1,47 @@
 'use client';
-import { Alert, Autocomplete, Box, Button, Card, CardActions, CardContent, Stack, TextField, Typography } from "@mui/material";
-import { Airport, AirportCondition, MappingJson, SectorMapping, VideoMap } from "@prisma/client";
+import {
+    Alert,
+    Autocomplete,
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material";
+import {AirspaceCondition, AirspaceConditionContainer, MappingJson, SectorMapping, VideoMap} from "@prisma/client";
 import Form from "next/form";
-import { useState } from "react";
+import {useState} from "react";
 import FormSaveButton from "../Form/FormSaveButton";
-import { toast } from "react-toastify";
-import { updateSectorMappingJsons } from "@/actions/sectorMapping";
-import { updateVideoMapJsons, updateVideoMapOrder } from "@/actions/videoMap";
-import { useRouter } from "next/navigation";
+import {toast} from "react-toastify";
+import {updateSectorMappingJsons} from "@/actions/sectorMapping";
+import {updateVideoMapJsons} from "@/actions/videoMap";
 
-export type AirportConditionWithAirport = AirportCondition & { airport: Airport };
-export type MappingJsonWithCondition = MappingJson & { airportCondition?: AirportConditionWithAirport };
+export type AirspaceConditionWithContainer = AirspaceCondition & { container: AirspaceConditionContainer };
+export type MappingJsonWithCondition = MappingJson & { airspaceCondition?: AirspaceConditionWithContainer };
 
 export type NewMapping = {
-    airportConditionId?: string;
+    airspaceConditionId?: string;
     videoMapId?: string;
     sectorMappingId?: string;
     file: File;
 };
 
-export default function MappingJsonForm({ parent, mappings: existingMappings = [], allConditions }: { parent: VideoMap | SectorMapping, mappings?: MappingJsonWithCondition[], allConditions: AirportConditionWithAirport[], }) {
+export default function MappingJsonForm({parent, mappings: existingMappings = [], allConditions}: {
+    parent: VideoMap | SectorMapping,
+    mappings?: MappingJsonWithCondition[],
+    allConditions: AirspaceConditionWithContainer[],
+}) {
 
     const [mappings, setMappings] = useState<MappingJsonWithCondition[]>(existingMappings);
     const [newMappings, setNewMappings] = useState<NewMapping[]>([]);
 
-    const [selectedCondition, setSelectedCondition] = useState<AirportConditionWithAirport | null>(null);
+    const [selectedCondition, setSelectedCondition] = useState<AirspaceConditionWithContainer | null>(null);
 
     const addNewMapping = async (formData: FormData) => {
-        const airportConditionId = selectedCondition?.id;
+        const airspaceConditionId = selectedCondition?.id;
         let videoMapId;
         let sectorMappingId;
 
@@ -41,11 +55,11 @@ export default function MappingJsonForm({ parent, mappings: existingMappings = [
 
         if (!selectedCondition) {
             setMappings([]);
-            setNewMappings([{ airportConditionId, videoMapId, sectorMappingId, file }]);
+            setNewMappings([{airspaceConditionId, videoMapId, sectorMappingId, file}]);
 
             toast.warning('All existing mappings deleted.');
         } else {
-            setNewMappings([...newMappings, { airportConditionId, videoMapId, sectorMappingId, file }]);
+            setNewMappings([...newMappings, {airspaceConditionId, videoMapId, sectorMappingId, file}]);
         }
 
         toast.success('New mapping added. Make sure to save your changes at the end.');
@@ -56,8 +70,8 @@ export default function MappingJsonForm({ parent, mappings: existingMappings = [
     const submitChanges = async () => {
         const isSectorMapping = 'idsRadarSectorId' in parent;
 
-        const conditionIds = mappings.map(m => m.airportConditionId);
-        const newConditionIds = newMappings.map(m => m.airportConditionId);
+        const conditionIds = mappings.map(m => m.airspaceConditionId);
+        const newConditionIds = newMappings.map(m => m.airspaceConditionId);
 
         if (newConditionIds.some(id => conditionIds.includes(id || null))) {
             toast.error('You have added a condition that already exists in the mappings.  Please remove the duplicates.');
@@ -107,7 +121,9 @@ export default function MappingJsonForm({ parent, mappings: existingMappings = [
                 <Card key={mapping.id} variant="outlined">
                     <CardContent>
                         <Typography variant="h6">{mapping.jsonKey}</Typography>
-                        { mapping.airportCondition ? <Typography>Condition: {mapping.airportCondition.airport.icao}/{mapping.airportCondition.name}</Typography> : <Typography>Condition: N/A</Typography> }
+                        {mapping.airspaceCondition ?
+                            <Typography>Condition: {mapping.airspaceCondition.container.name}/{mapping.airspaceCondition.name}</Typography> :
+                            <Typography>Condition: N/A</Typography>}
                     </CardContent>
                     <CardActions>
                         <Button variant="outlined" color="inherit" onClick={() => {
@@ -121,7 +137,9 @@ export default function MappingJsonForm({ parent, mappings: existingMappings = [
                 <Card key={index} variant="outlined">
                     <CardContent>
                         <Typography variant="h6">NEW - File Upload</Typography>
-                        {mapping.airportConditionId ? <Typography>Condition: {allConditions.find(c => c.id === mapping.airportConditionId)?.airport.icao}/{allConditions.find(c => c.id === mapping.airportConditionId)?.name}</Typography> : <Typography>Condition: N/A</Typography>}
+                        {mapping.airspaceConditionId ?
+                            <Typography>Condition: {allConditions.find(c => c.id === mapping.airspaceConditionId)?.container.name}/{allConditions.find(c => c.id === mapping.airspaceConditionId)?.name}</Typography> :
+                            <Typography>Condition: N/A</Typography>}
                     </CardContent>
                     <CardActions>
                     <Button variant="outlined" color="inherit" onClick={() => {
@@ -141,7 +159,7 @@ export default function MappingJsonForm({ parent, mappings: existingMappings = [
                             <input type="file" name="file" accept="application/json" />
                             <Autocomplete 
                                 options={allConditions}
-                                getOptionLabel={(option) => `${option.airport.icao}/${option.name}`}
+                                getOptionLabel={(option) => `${option.container.name}/${option.name}`}
                                 onChange={(e, value) => {
                                     setSelectedCondition(value);
                                 }}

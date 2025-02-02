@@ -1,8 +1,8 @@
-import {AirportConditionWithAirport} from "@/components/Viewer/AirspaceViewer";
+import {AirspaceConditionWithContainer} from "@/components/Viewer/AirspaceViewer";
 import {Chip} from "@mui/material";
 import React from "react";
 
-export const getConditionChips = (conditions: AirportConditionWithAirport[]) => {
+export const getConditionChips = (conditions: AirspaceConditionWithContainer[]) => {
     const airports = conditions.map(condition => condition.airport);
     // do the filtering by icao
     const uniqueAirportIcaos = Array.from(new Set(airports.map(airport => airport.icao)));

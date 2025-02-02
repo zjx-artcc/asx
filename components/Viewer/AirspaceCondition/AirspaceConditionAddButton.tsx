@@ -1,6 +1,6 @@
 'use client';
 import React, {useState} from 'react';
-import {AirportWithConditions} from "@/components/Viewer/AirspaceViewer";
+import {AirspaceContainerWithConditions} from "@/components/Viewer/AirspaceViewer";
 import {
     Autocomplete,
     Button,
@@ -15,21 +15,23 @@ import {
 } from "@mui/material";
 import {Add} from "@mui/icons-material";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
-import {AirportCondition} from "@prisma/client";
+import {AirspaceCondition} from "@prisma/client";
 
-export default function AirspaceConditionAddButton({allAirports,}: { allAirports: AirportWithConditions[], }) {
+export default function AirspaceConditionAddButton({allContainers,}: {
+    allContainers: AirspaceContainerWithConditions[],
+}) {
 
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
     const activeConditionIds = searchParams.get('conditions')?.split(',') ?? [];
     const [open, setOpen] = useState(false);
-    const [selectedAirport, setSelectedAirport] = useState<AirportWithConditions | null>(null);
-    const [selectedCondition, setSelectedCondition] = useState<AirportCondition | null>(null);
+    const [selectedAirport, setSelectedAirport] = useState<AirspaceContainerWithConditions | null>(null);
+    const [selectedCondition, setSelectedCondition] = useState<AirspaceCondition | null>(null);
 
-    const conditionedAirports = allAirports.flatMap(airport => airport.conditions).filter(condition => activeConditionIds.includes(condition.id));
+    const conditionedAirports = allContainers.flatMap(airport => airport.conditions).filter(condition => activeConditionIds.includes(condition.id));
 
-    const disabled = conditionedAirports.length === allAirports.length;
+    const disabled = conditionedAirports.length === allContainers.length;
 
     const close = () => {
         setOpen(false);
@@ -59,8 +61,8 @@ export default function AirspaceConditionAddButton({allAirports,}: { allAirports
                 <DialogContent>
                     <Stack direction="column" spacing={2}>
                         <Autocomplete
-                            options={allAirports.filter(airport => !conditionedAirports.some(condition => condition.airportId === airport.id))}
-                            getOptionLabel={(option) => `${option.icao}`}
+                            options={allContainers.filter(airport => !conditionedAirports.some(condition => condition.containerId === airport.id))}
+                            getOptionLabel={(option) => `${option.name}`}
                             onChange={(e, value) => {
                                 setSelectedAirport(value);
                             }}

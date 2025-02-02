@@ -43,7 +43,7 @@ export default function VideoMapSelector({allVideoMaps}: { allVideoMaps: VideoMa
                         key={key}
                         {...optionProps}>
                         <Typography sx={{mr: 1,}}>{option.name}</Typography>
-                        {getConditionChips(option.mappings.flatMap(mapping => mapping.airportCondition).filter((ac) => !!ac))}
+                        {getConditionChips(option.mappings.flatMap(mapping => mapping.airspaceCondition).filter((ac) => !!ac))}
                     </Box>
                 )
             }}

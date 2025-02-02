@@ -1,5 +1,12 @@
 import React from "react";
-import {Airport, AirportCondition, MappingJson, RadarFacility, SectorMapping, VideoMap,} from "@prisma/client";
+import {
+    AirspaceCondition,
+    AirspaceConditionContainer,
+    MappingJson,
+    RadarFacility,
+    SectorMapping,
+    VideoMap,
+} from "@prisma/client";
 import prisma from "@/lib/db";
 import AirspaceConditionSelector from "@/components/Viewer/AirspaceCondition/AirspaceConditionSelector";
 import {Box, Card, CardContent, Divider, Grid2, Typography} from "@mui/material";
@@ -8,14 +15,14 @@ import FacilitySelector from "@/components/Viewer/FacilitySelector/FacilitySelec
 import MapWrapper from "@/components/Viewer/Map/MapWrapper";
 import {IdsConsolidation} from "@/app/active-consolidations/page";
 
-export type AirportConditionWithAirport = AirportCondition & {
-  airport: Airport;
+export type AirspaceConditionWithContainer = AirspaceCondition & {
+    container: AirspaceConditionContainer;
 };
 export type MappingJsonWithConditions = MappingJson & {
-  airportCondition?: AirportConditionWithAirport;
+    airspaceCondition?: AirspaceConditionWithContainer;
 };
-export type AirportWithConditions = Airport & {
-  conditions: AirportCondition[];
+export type AirspaceContainerWithConditions = AirspaceConditionContainer & {
+    conditions: AirspaceCondition[];
 };
 export type VideoMapWithMappings = VideoMap & {
   mappings: MappingJsonWithConditions[];
@@ -28,7 +35,7 @@ export type SectorMappingWithConditions = SectorMapping & {
 };
 
 export default async function AirspaceViewer({idsConsolidations}: { idsConsolidations?: IdsConsolidation[], }) {
-  const allAirports = await prisma.airport.findMany({
+    const allContainers = await prisma.airspaceConditionContainer.findMany({
     include: {
       conditions: true,
     },
@@ -48,9 +55,9 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
     include: {
       mappings: {
         include: {
-          airportCondition: {
+            airspaceCondition: {
             include: {
-              airport: true,
+                container: true,
             },
           },
         },
@@ -67,9 +74,9 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
         include: {
           mappings: {
             include: {
-              airportCondition: {
+                airspaceCondition: {
                 include: {
-                  airport: true,
+                    container: true,
                 },
               },
             },
@@ -86,7 +93,7 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
         <Box>
             <Grid2 container columns={10} spacing={2} sx={{my: 2, mx: 2,}}>
                 <Grid2 size={10}>
-                    <AirspaceConditionSelector airports={allAirports as AirportWithConditions[]}/>
+                    <AirspaceConditionSelector airports={allContainers as AirspaceContainerWithConditions[]}/>
                 </Grid2>
                 <Grid2 size={2} sx={{minHeight: 'calc(100vh - 64px - 96px)',}}>
                     <Card sx={{height: '100%',}}>
@@ -102,7 +109,7 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
                 </Grid2>
                 <Grid2 size={8} sx={{minHeight: 'calc(100vh - 64px - 96px)',}}>
                     <MapWrapper
-                        allConditions={allAirports.flatMap((a) => a.conditions) as AirportConditionWithAirport[]}
+                        allConditions={allContainers.flatMap((a) => a.conditions) as AirspaceConditionWithContainer[]}
                         allVideoMaps={allVideoMaps as VideoMapWithMappings[]}
                         allFacilities={allFacilities as RadarFacilityWithSectors[]}
                         idsConsolidations={idsConsolidations}

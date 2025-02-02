@@ -156,7 +156,7 @@ export const updateVideoMapJsons = async (deleteIds: string[], newMappings: NewM
 
         const mj = await prisma.mappingJson.create({
             data: {
-                airportConditionId: mapping.airportConditionId,
+                airspaceConditionId: mapping.airspaceConditionId,
                 videoMapId: mapping.videoMapId,
                 jsonKey: res.data.key,
             },

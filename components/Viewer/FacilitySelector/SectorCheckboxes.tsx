@@ -13,23 +13,23 @@ export default function SectorCheckboxes({sectors}: { sectors: SectorMappingWith
     const [activeSectors, setActiveSectors] = React.useState<SectorMappingWithConditions[]>([]);
 
     useEffect(() => {
-        const activeSectorIds = searchParams.get('sectors')?.split(',') ?? [];
+        const activeSectorIds = searchParams.get('sectors')?.split(',').filter((s) => !!s) ?? [];
         const activeSectors = sectors.filter(sector => activeSectorIds.includes(sector.id));
         setActiveSectors(activeSectors);
     }, [sectors, searchParams]);
 
     const onAddSector = (sectorId: string) => {
         const newSearchParams = new URLSearchParams(searchParams);
-        const activeSectorIds = newSearchParams.get('sectors')?.split(',') ?? [];
+        const activeSectorIds = newSearchParams.get('sectors')?.split(',').filter((s) => !!s) ?? [];
         newSearchParams.set('sectors', [...activeSectorIds, sectorId].join(','));
-        router.push(`${pathname}?${newSearchParams.toString()}`);
+        router.push(`${pathname}?${newSearchParams.toString()}`, {scroll: true,});
     }
 
     const onRemoveSector = (sectorId: string) => {
         const newSearchParams = new URLSearchParams(searchParams);
-        const activeSectorIds = newSearchParams.get('sectors')?.split(',') ?? [];
+        const activeSectorIds = newSearchParams.get('sectors')?.split(',').filter((s) => !!s) ?? [];
         newSearchParams.set('sectors', activeSectorIds.filter(id => id !== sectorId).join(','));
-        router.push(`${pathname}?${newSearchParams.toString()}`);
+        router.push(`${pathname}?${newSearchParams.toString()}`, {scroll: true,});
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +50,7 @@ export default function SectorCheckboxes({sectors}: { sectors: SectorMappingWith
                                                      onChange={handleChange}/>} label={
                     <Stack direction="row" spacing={1} alignItems="center">
                         <Typography>{sector.name}</Typography>
-                        {getConditionChips(sector.mappings.flatMap(mapping => mapping.airportCondition).filter((ac) => !!ac))}
+                        {getConditionChips(sector.mappings.flatMap(mapping => mapping.airspaceCondition).filter((ac) => !!ac))}
                     </Stack>
                 }/>
             ))}
