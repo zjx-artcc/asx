@@ -15,9 +15,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         include: {
             mappings: {
                 include: {
-                    airportCondition: {
+                    airspaceCondition: {
                         include: {
-                            airport: true,
+                            container: true,
                         },
                     },
                 },
@@ -29,12 +29,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         notFound();
     }
 
-    const allConditions = await prisma.airportCondition.findMany({
+    const allConditions = await prisma.airspaceCondition.findMany({
         include: {
-            airport: true,
+            container: true,
         },
         orderBy: {
-            airport: {
+            container: {
                 order: 'asc',
             },
         },

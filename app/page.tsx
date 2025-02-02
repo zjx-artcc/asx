@@ -11,7 +11,7 @@ export default function Home() {
       <Grid2 container spacing={4} columns={2}>
         <Grid2 size={{ xs: 2, md: 1, }}>
           <Link href="/active-consolidations" style={{color: 'inherit', textDecoration: 'none',}}>
-            <Card>
+            <Card sx={{height: '100%',}}>
               <CardActionArea>
                 <CardMedia title="Active Radar Consolidations">
                   <div style={{position: 'relative', width: '100%', height: 200,}}>
@@ -30,7 +30,7 @@ export default function Home() {
         </Grid2>
         <Grid2 size={{ xs: 2, md: 1, }}>
           <Link href="/explorer" style={{color: 'inherit', textDecoration: 'none',}}>
-            <Card>
+            <Card sx={{height: '100%',}}>
               <CardActionArea>
                 <CardMedia title="Active Radar Consolidations">
                   <div style={{position: 'relative', width: '100%', height: 200,}}>

@@ -93,12 +93,12 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
         <Box>
             <Grid2 container columns={10} spacing={2} sx={{my: 2, mx: 2,}}>
                 <Grid2 size={10}>
-                    <AirspaceConditionSelector airports={allContainers as AirspaceContainerWithConditions[]}/>
+                    <AirspaceConditionSelector containers={allContainers as AirspaceContainerWithConditions[]}/>
                 </Grid2>
-                <Grid2 size={2} sx={{minHeight: 'calc(100vh - 64px - 96px)',}}>
+                <Grid2 size={{xs: 10, md: 3, xl: 2,}} sx={{minHeight: {xs: 'auto', md: 'calc(100vh - 64px - 96px)',},}}>
                     <Card sx={{height: '100%',}}>
                         <CardContent>
-                            <Typography variant="h6" textAlign="center" gutterBottom>Airspace Explorer</Typography>
+                            <Typography variant="h6" textAlign="center" gutterBottom>Map Settings</Typography>
                             <Divider sx={{my: 2,}}/>
                             <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
                             <Divider sx={{my: 2,}}/>
@@ -107,7 +107,8 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
                         </CardContent>
                     </Card>
                 </Grid2>
-                <Grid2 size={8} sx={{minHeight: 'calc(100vh - 64px - 96px)',}}>
+                <Grid2 size={{xs: 10, md: 7, xl: 8,}}
+                       sx={{minHeight: {xs: '100vh', md: 'calc(100vh - 64px - 96px)',},}}>
                     <MapWrapper
                         allConditions={allContainers.flatMap((a) => a.conditions) as AirspaceConditionWithContainer[]}
                         allVideoMaps={allVideoMaps as VideoMapWithMappings[]}

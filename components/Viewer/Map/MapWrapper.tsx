@@ -22,8 +22,8 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
 
     const searchParams = useSearchParams();
 
-    const videoMapId = searchParams.get('videoMap');
-    const videoMap = allVideoMaps.find(videoMap => videoMap.id === videoMapId);
+    const videoMapIds = searchParams.get('videoMaps')?.split(',').filter(Boolean) ?? [];
+    const videoMaps = allVideoMaps.filter(videoMap => videoMapIds.includes(videoMap.id));
 
 
     const sectorIds = searchParams.get('sectors')?.split(',').filter((i) => !!i) ?? [];
@@ -51,7 +51,7 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
     const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
     const conditions = allConditions.filter(condition => conditionIds.includes(condition.id));
 
-    if (!videoMap) {
+    if (videoMaps.length === 0) {
         return (
             <Card>
                 <CardContent>
@@ -70,7 +70,7 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         )
     }
 
-    const jsons = getJsons(videoMap, sectors, conditions);
+    const jsons = getJsons(videoMaps, sectors, conditions);
 
     if (jsons.errors) {
         return (
@@ -104,29 +104,36 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         }
     }
 
-    return jsons?.videoJson && jsons?.sectorJsons && (
-        <Map videoMapKey={jsons.videoJson.jsonKey} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
+    return jsons?.videoJsons && jsons?.sectorJsons && (
+        <Map videoMapKeys={jsons.videoJsons.map((j) => j.jsonKey)} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
              colorProviders={colorProviders}/>
     );
 
 }
 
-const getJsons = (videoMap: VideoMapWithMappings | null, sectors: SectorMappingWithConditions[], conditions: AirspaceConditionWithContainer[]): {
+const getJsons = (videoMaps: VideoMapWithMappings[], sectors: SectorMappingWithConditions[], conditions: AirspaceConditionWithContainer[]): {
     errors?: string[],
-    videoJson?: MappingJsonWithConditions,
+    videoJsons?: MappingJsonWithConditions[],
     sectorJsons?: MappingJsonWithConditions[],
 } => {
 
     const errors: string[] = [];
 
-    if (!videoMap) {
+    if (videoMaps.length === 0) {
         return {errors: ['No video map selected']};
     }
 
-    const videoJson = getBestMapping(videoMap.mappings, conditions);
+    const videoJsons = [];
 
-    if (Array.isArray(videoJson)) {
-        errors.push(`Video map ${videoMap.name} requires an airspace condition to be set for ONE the following: ${videoJson.join(', ')}`);
+    for (const videoMap of videoMaps) {
+        const videoJson = getBestMapping(videoMap.mappings, conditions);
+
+        if (Array.isArray(videoJson)) {
+            errors.push(`Video map ${videoMap.name} requires an airspace condition to be set for ONE the following: ${videoJson.join(', ')}`);
+            continue;
+        }
+
+        videoJsons.push(videoJson);
     }
 
     const sectorJsons: MappingJsonWithConditions[] = [];
@@ -134,7 +141,7 @@ const getJsons = (videoMap: VideoMapWithMappings | null, sectors: SectorMappingW
     for (const sector of sectors) {
 
         if (sector.mappings.length === 0) {
-            errors.push(`Sector ${sector.name} has no GEOJSON mappings.`);
+            // errors.push(`Sector ${sector.name} has no GEOJSON mappings.`);
             continue;
         }
 
@@ -152,7 +159,7 @@ const getJsons = (videoMap: VideoMapWithMappings | null, sectors: SectorMappingW
         return {errors};
     }
 
-    return {videoJson: videoJson as MappingJsonWithConditions, sectorJsons};
+    return {videoJsons, sectorJsons};
 }
 
 const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditions: AirspaceConditionWithContainer[]): MappingJsonWithConditions | string[] => {
@@ -177,7 +184,7 @@ const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditio
     }
 
     return availableMappings
-        .map(m => m.airportCondition?.container)
+        .map(m => m.airspaceCondition?.container)
         .filter(a => !!a).map(a => a.name)
         .filter((airport, index, self) => self.indexOf(airport) === index);
 }

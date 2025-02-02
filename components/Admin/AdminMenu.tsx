@@ -1,7 +1,7 @@
 import {Card, CardContent, List, ListItemButton, ListItemIcon, ListItemText, Typography} from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import {AirplanemodeActive, Home, ListAlt, Radar, Wallpaper,} from "@mui/icons-material";
+import {Home, ListAlt, Radar, Tune, Wallpaper,} from "@mui/icons-material";
 
 export default function AdminMenu() {
     return (
@@ -20,7 +20,7 @@ export default function AdminMenu() {
                     <Link href="/admin/containers" style={{textDecoration: 'none', color: 'inherit',}}>
                         <ListItemButton>
                             <ListItemIcon>
-                                <AirplanemodeActive />
+                                <Tune/>
                             </ListItemIcon>
                             <ListItemText primary="Airspace Condition Containers"/>
                         </ListItemButton>

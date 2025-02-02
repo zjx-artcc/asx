@@ -4,8 +4,10 @@ import LoginButton from "@/components/Navbar/LoginButton";
 import {Session} from "next-auth";
 import Link from "next/link";
 import getConfig from 'next/config';
+import ColorModeSwitcher from "@/components/Navbar/ColorModeSwitcher";
+import Logo from "@/components/Navbar/Logo";
 
-const {IS_STAFF_ENDPOINT, DEV_MODE} = process.env;
+const {IS_STAFF_ENDPOINT} = process.env;
 
 export default async function Navbar({session}: { session: Session | null, }) {
 
@@ -16,19 +18,16 @@ export default async function Navbar({session}: { session: Session | null, }) {
     return (
         <AppBar position="sticky">
             <Toolbar>
-                <Link href="/" style={{ textDecoration: 'none', color: 'inherit', }}>
-                    <Box sx={{ml: 4, p: 0.5, border: 1, borderColor: 'cyan', display: { xs: 'none', sm: 'block', }, }}>
-                        <Typography variant="subtitle1" color="cyan"
-                                    fontWeight="bold">{session?.user.fullName || 'NO SESSION'}</Typography>
-                        {DEV_MODE === 'true' &&
-                            <Typography variant="subtitle2" color="limegreen">Development Build</Typography>}
-                        {DEV_MODE !== 'true' &&
-                            <Typography variant="subtitle2">ASX v{publicRuntimeConfig?.version}</Typography>}
-                    </Box>
+                <Box sx={{display: {xs: 'none', sm: 'flex',},}}>
+                    <Logo/>
+                </Box>
+                <Link href="/" style={{textDecoration: 'none', color: 'inherit',}}>
+                    <Typography variant="h6" sx={{ml: 2,}}>A.S.X. v{publicRuntimeConfig.version}</Typography>
                 </Link>
                 <span style={{flexGrow: 1,}}></span>
+                <ColorModeSwitcher/>
                 {session && isStaff && <Link href="/admin" style={{color: 'inherit',}}>
-                    <Button variant="contained" color="inherit" sx={{mr: 1,}}>ADMIN</Button>
+                    <Button variant="outlined" color="inherit" sx={{ml: 1,}}>ADMIN</Button>
                 </Link>}
                 <LoginButton session={session}/>
             </Toolbar>

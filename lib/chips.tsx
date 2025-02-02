@@ -3,10 +3,9 @@ import {Chip} from "@mui/material";
 import React from "react";
 
 export const getConditionChips = (conditions: AirspaceConditionWithContainer[]) => {
-    const airports = conditions.map(condition => condition.airport);
-    // do the filtering by icao
-    const uniqueAirportIcaos = Array.from(new Set(airports.map(airport => airport.icao)));
-    return uniqueAirportIcaos.map((icao, idx) => (
-        <Chip key={idx} color="primary" size="small" label={icao}/>
+    const containers = conditions.map(condition => condition.container);
+    const uniqueContainerNames = Array.from(new Set(containers.map(container => container.name)));
+    return uniqueContainerNames.map((name, idx) => (
+        <Chip key={idx} color="primary" size="small" label={name}/>
 ));
 }
