@@ -14,7 +14,7 @@ import * as leafletPip from "@mapbox/leaflet-pip";
 const Tooltips = (params) => {
   const map = useMap();
   const [coords, setCoords] = useState({});
-  const [tooltip, setTooltip] = useState([]);
+  const [tooltip, ] = useState([]);
 
   useEffect(() => {
     if (!map) return;
@@ -54,7 +54,6 @@ const Tooltips = (params) => {
             } : '';
 
             var index = tooltip.findIndex((item) => item.sector === params.sectors[i].json.name);
-            console.log(index)
             if (index === -1) {
               tooltip.push(data);
             } else {
@@ -70,7 +69,7 @@ const Tooltips = (params) => {
     }
     
 
-    console.log("tooltip", Array.from(tooltip));
+    // console.log("tooltip", Array.from(tooltip));
   }, [lat]);
 
   tooltip.sort((a,b)=> b.lowAltitude - a.lowAltitude)
