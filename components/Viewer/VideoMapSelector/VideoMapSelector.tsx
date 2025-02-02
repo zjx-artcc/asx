@@ -13,10 +13,22 @@ export default function VideoMapSelector({allVideoMaps}: { allVideoMaps: VideoMa
     const [selectedVideoMaps, setSelectedVideoMaps] = useState<VideoMapWithMappings[]>([]);
 
     useEffect(() => {
+
+        if (!searchParams.has('videoMaps')) {
+            const defaultVideoMaps = allVideoMaps.filter(videoMap => videoMap.defaultEnabled);
+            if (defaultVideoMaps.length > 0) {
+                const newSearchParams = new URLSearchParams(searchParams);
+                newSearchParams.delete('videoMap');
+                newSearchParams.set('videoMaps', defaultVideoMaps.map(videoMap => videoMap.id).join(','));
+                router.push(`${pathname}?${newSearchParams.toString()}`);
+            }
+            return;
+        }
+
         const selectedVideoMapIds = searchParams.get('videoMaps')?.split(',').filter(Boolean) || [];
         const selectedVideoMaps = allVideoMaps.filter(videoMap => selectedVideoMapIds.includes(videoMap.id));
         setSelectedVideoMaps(selectedVideoMaps);
-    }, [allVideoMaps, searchParams]);
+    }, [allVideoMaps, pathname, router, searchParams]);
 
     const handleChange = (e: SyntheticEvent, v: VideoMapWithMappings[]) => {
         setSelectedVideoMaps(v);

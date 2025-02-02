@@ -65,6 +65,8 @@ model VideoMap {
   id   String @id @default(cuid())
   name String @unique
 
+  defaultEnabled Boolean @default(false)
+
   order Int @default(0)
 
   mappings MappingJson[]

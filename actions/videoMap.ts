@@ -86,11 +86,13 @@ export const createOrUpdateVideoMap = async (formData: FormData) => {
     
     const vmZ = z.object({
         id: z.string().optional(),
+        defaultEnabled: z.boolean().optional(),
         name: z.string().nonempty("Name is required"),
     })
 
     const result = vmZ.safeParse({
         id: formData.get('id') as string,
+        defaultEnabled: formData.get('defaultEnabled') === 'on',
         name: formData.get('name') as string,
     });
 
@@ -105,6 +107,7 @@ export const createOrUpdateVideoMap = async (formData: FormData) => {
             },
             data: {
                 name: result.data.name,
+                defaultEnabled: result.data.defaultEnabled,
             },
         });
 
@@ -119,6 +122,7 @@ export const createOrUpdateVideoMap = async (formData: FormData) => {
         const vm = await prisma.videoMap.create({
             data: {
                 name: result.data.name,
+                defaultEnabled: result.data.defaultEnabled,
             },
         });
 
