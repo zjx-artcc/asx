@@ -89,24 +89,30 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         );
     }
 
-    const colorProviders: { [key: string]: string, } = {};
-
-    for (const json of jsons?.sectorJsons || []) {
-        colorProviders[json.jsonKey] = json.jsonKey;
-    }
+    const colors: { [key: string]: string, } = {};
 
     if (idsConsolidations) {
+        const color = getRandomSharpHexColor();
         for (const idsConsolidation of idsConsolidations) {
-            colorProviders[idsConsolidation.primarySectorId] = idsConsolidation.primarySectorId;
+            const primaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId)?.id);
+
+            if (!primaryMap) continue;
+
+            colors[primaryMap.jsonKey] = color;
             for (const secondarySectorId of idsConsolidation.secondarySectorIds) {
-                colorProviders[secondarySectorId] = idsConsolidation.primarySectorId;
+                const secondaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === secondarySectorId)?.id);
+
+                if (!secondaryMap) continue;
+
+                colors[secondaryMap.jsonKey] = color;
             }
         }
     }
 
+
     return jsons?.videoJsons && jsons?.sectorJsons && (
         <Map videoMapKeys={jsons.videoJsons.map((j) => j.jsonKey)} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
-             colorProviders={colorProviders}/>
+             colors={colors}/>
     );
 
 }
@@ -187,4 +193,25 @@ const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditio
         .map(m => m.airspaceCondition?.container)
         .filter(a => !!a).map(a => a.name)
         .filter((airport, index, self) => self.indexOf(airport) === index);
+}
+
+function getRandomSharpHexColor(): string {
+    const hue = Math.floor(Math.random() * 360); // Random hue (0-359)
+    const saturation = 90 + Math.random() * 10; // High saturation (90-100%)
+    const lightness = 50 + Math.random() * 10; // Moderate brightness (50-60%)
+
+    const hslToHex = (h: number, s: number, l: number): string => {
+        s /= 100;
+        l /= 100;
+
+        const k = (n: number) => (n + h / 30) % 12;
+        const a = s * Math.min(l, 1 - l);
+        const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+
+        const toHex = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
+
+        return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+    };
+
+    return hslToHex(hue, saturation, lightness);
 }

@@ -1,5 +1,5 @@
 'use client';
-import React, {useCallback, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {Box, Card, CardContent} from "@mui/material";
 import LeafletMap from "@/components/Map/Map";
 import Geojson from "@/components/GeoJSON/GeoJSON";
@@ -17,16 +17,17 @@ type GeoJSONWithColor = {
         },
     },
     color: string,
+    videoMap: boolean,
 };
 
 const CENTER_LAT = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LAT']) || 36.5;
 const CENTER_LONG = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LONG']) || -77;
 const ZOOM = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_ZOOM']) || 6.5;
 
-export default function Map({videoMapKeys, sectorKeys, colorProviders,}: {
+export default function Map({videoMapKeys, sectorKeys, colors}: {
     videoMapKeys: string[],
     sectorKeys: string[],
-    colorProviders: { // noinspection JSUnusedLocalSymbols
+    colors: { // noinspection JSUnusedLocalSymbols
         [key: string]: string,
     },
 }) {
@@ -39,23 +40,6 @@ export default function Map({videoMapKeys, sectorKeys, colorProviders,}: {
         return await res.json();
     }
 
-    const getColor = useCallback((file: GeoJSONWithColor, all: GeoJSONWithColor[]): string => {
-        const colorProviderKey = colorProviders[file.key];
-
-        if (colorProviderKey === file.key) {
-            return file.json?.crs?.properties?.color || 'black';
-        }
-
-        let color = file.json?.crs?.properties?.color;
-
-        if (colorProviderKey) {
-            const colorProviderFile = all.find((file) => file.key === colorProviderKey);
-            color = colorProviderFile?.json?.crs?.properties?.color || 'black';
-        }
-
-        return color || 'black';
-    }, [colorProviders]);
-
     useEffect(() => {
         const fetchAll = async () => {
             const videoFiles = await Promise.all(videoMapKeys.map(fetchJson));
@@ -64,21 +48,21 @@ export default function Map({videoMapKeys, sectorKeys, colorProviders,}: {
                 ...videoFiles.map((json, index) => ({
                     key: videoMapKeys[index],
                     json,
-                    color: json.crs.properties.color || 'black'
+                    color: json?.crs?.properties?.color || 'black',
+                    videoMap: true,
                 })),
                 ...sectorFiles.map((json, index) => ({
                     key: sectorKeys[index],
                     json,
-                    color: json.crs.properties.color || 'black'
+                    color: colors[sectorKeys[index]] || json?.crs?.properties?.color || 'black',
+                    videoMap: false,
                 }))
             ] satisfies GeoJSONWithColor[];
         }
 
-        fetchAll().then((files) => {
-            setFiles(files.map((file) => ({...file, color: getColor(file, files)})));
-        });
+        fetchAll().then(setFiles);
 
-    }, [videoMapKeys, sectorKeys, getColor]);
+    }, [videoMapKeys, sectorKeys, colors]);
 
     return (
         <Card sx={{height: '100%', display: 'flex', flexDirection: 'column'}}>

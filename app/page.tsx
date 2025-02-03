@@ -31,7 +31,7 @@ export default function Home() {
         <Grid2 size={{ xs: 2, md: 1, }}>
           <Link href="/explorer" style={{color: 'inherit', textDecoration: 'none',}}>
             <Card sx={{height: '100%',}}>
-              <CardActionArea>
+              <CardActionArea sx={{height: '100%',}}>
                 <CardMedia title="Active Radar Consolidations">
                   <div style={{position: 'relative', width: '100%', height: 200,}}>
                     <Image src={airspaceExplorer} alt="Airspace Explorer" layout="fill" objectFit="cover"/>
