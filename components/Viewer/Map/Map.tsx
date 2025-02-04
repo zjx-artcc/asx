@@ -24,11 +24,15 @@ const CENTER_LAT = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LAT']) || 
 const CENTER_LONG = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LONG']) || -77;
 const ZOOM = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_ZOOM']) || 6.5;
 
-export default function Map({videoMapKeys, sectorKeys, colors}: {
+export default function Map({videoMapKeys, sectorKeys, colors, consolidations}: {
     videoMapKeys: string[],
     sectorKeys: string[],
     colors: { // noinspection JSUnusedLocalSymbols
         [key: string]: string,
+    },
+    consolidations: {
+        // noinspection JSUnusedLocalSymbols
+        [key: string]: string[],
     },
 }) {
 
@@ -93,7 +97,7 @@ export default function Map({videoMapKeys, sectorKeys, colors}: {
                             />
                         ))}
 
-                        <Tooltips sectors={files}/>
+                        <Tooltips sectors={files} consolidations={consolidations}/>
                     </LeafletMap>
                 </Box>
             </CardContent>

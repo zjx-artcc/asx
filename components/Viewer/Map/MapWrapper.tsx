@@ -109,10 +109,17 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         }
     }
 
+    const convertedConsolidations: { [key: string]: string[] } = {};
+
+    if (idsConsolidations) {
+        for (const idsConsolidation of idsConsolidations) {
+            convertedConsolidations[idsConsolidation.primarySectorId] = idsConsolidation.secondarySectorIds;
+        }
+    }
 
     return jsons?.videoJsons && jsons?.sectorJsons && (
         <Map videoMapKeys={jsons.videoJsons.map((j) => j.jsonKey)} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
-             colors={colors}/>
+             colors={colors} consolidations={convertedConsolidations}/>
     );
 
 }

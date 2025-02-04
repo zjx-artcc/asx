@@ -1,30 +1,73 @@
 'use client';
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {RadarFacilityWithSectors, SectorMappingWithConditions} from "@/components/Viewer/AirspaceViewer";
-import {Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Stack, Typography} from "@mui/material";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Checkbox,
+    IconButton,
+    Stack,
+    Typography
+} from "@mui/material";
 import {Delete, ExpandMore} from "@mui/icons-material";
 import SectorCheckboxes from "@/components/Viewer/FacilitySelector/SectorCheckboxes";
-import {useSearchParams} from "next/navigation";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 
-export default function FacilityAccordion({facility, onDelete, disableDelete,}: {
+export default function FacilityAccordion({facility, onDelete, disableDelete, defaultAllSelected}: {
     facility: RadarFacilityWithSectors,
     onDelete: (facilityId: string) => void,
     disableDelete?: boolean,
+    defaultAllSelected?: boolean,
 }) {
 
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
     const [activeSectors, setActiveSectors] = React.useState<SectorMappingWithConditions[]>([]);
+    const [selectAll, setSelectAll] = React.useState(false);
+
+    const selectAllSectors = useCallback((checked: boolean) => {
+        setSelectAll(checked);
+
+        const newSearchParams = new URLSearchParams(searchParams);
+        const sectorIds = facility.sectors.map(sector => sector.id);
+
+        if (checked) {
+            const activeSectorIds = newSearchParams.get('sectors')?.split(',') ?? [];
+            newSearchParams.set('sectors', [...new Set([...activeSectorIds, ...sectorIds])].join(','));
+        } else {
+            const activeSectorIds = newSearchParams.get('sectors')?.split(',') ?? [];
+            newSearchParams.set('sectors', activeSectorIds.filter(id => !sectorIds.includes(id)).join(','));
+        }
+
+        router.push(`${pathname}?${newSearchParams.toString()}`);
+    }, [facility.sectors, pathname, router, searchParams]);
 
     useEffect(() => {
         const activeSectorIds = searchParams.get('sectors')?.split(',') ?? [];
         const activeSectors = facility.sectors.filter(sector => activeSectorIds.includes(sector.id) && sector.radarFacilityId === facility.id);
         setActiveSectors(activeSectors);
-    }, [facility, searchParams]);
+        setSelectAll(activeSectors.length === facility.sectors.length);
+        if (defaultAllSelected) {
+            selectAllSectors(true);
+        }
+    }, [defaultAllSelected, facility, searchParams, selectAllSectors]);
+
+    const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+        selectAllSectors(event.target.checked);
+    }
 
     return (
         <Accordion variant="outlined">
             <AccordionSummary expandIcon={<ExpandMore/>}>
                 <Stack direction="row" spacing={1} alignItems="center">
+                    <Checkbox
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        disabled={disableDelete}
+                    />
                     <Typography>{facility.name} ({activeSectors.length}/{facility.sectors.length})</Typography>
                     <Box>
                         <IconButton disabled={disableDelete} onClick={() => onDelete(facility.id)} size="small">

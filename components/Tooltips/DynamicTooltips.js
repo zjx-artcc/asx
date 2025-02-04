@@ -10,6 +10,7 @@ import * as leafletPip from "@mapbox/leaflet-pip";
 
 
 const Tooltips = (params) => {
+
     const map = useMap();
     const [coords, setCoords] = useState({});
     const [tooltip,] = useState([]);
@@ -50,17 +51,27 @@ const Tooltips = (params) => {
                     lowAlt = 'AOB';
                 }
 
+
                 if (Number(lowAlt) && Number(highAlt) && Number(highAlt) < Number(lowAlt)) {
                     const temp = lowAlt;
                     lowAlt = highAlt;
                     highAlt = temp;
                 }
 
-                console.log('low', lowAlt);
-                console.log('high', highAlt);
+                const sectorKey = params.sectors[i].key;
+
+                let name = params.sectors[i].json.name;
+
+                if (params.consolidations[sectorKey]) {
+                    const referencedSector = params.sectors.find((sector) => sector.key === sectorKey);
+                    if (referencedSector?.json?.name) {
+                        name = referencedSector.json.name;
+                    }
+                }
+
 
                 var data = hover[0] ? {
-                    sector: params.sectors[i].json.name,
+                    sector: name,
                     lowAltitude: lowAlt,
                     highAltitude: highAlt,
                     mixedAltitude: altitudeShelves.length > 1 ? altitudeShelves[0][1].split(" ").reverse().join(" ") : null
@@ -83,7 +94,7 @@ const Tooltips = (params) => {
         }
 
 
-    }, [lat, lng, params.sectors, tooltip]);
+    }, [params.consolidations, lat, lng, params.sectors, tooltip]);
 
     tooltip.sort((a, b) => b.lowAltitude - a.lowAltitude)
 

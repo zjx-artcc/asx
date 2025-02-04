@@ -25,69 +25,69 @@ export type AirspaceContainerWithConditions = AirspaceConditionContainer & {
     conditions: AirspaceCondition[];
 };
 export type VideoMapWithMappings = VideoMap & {
-  mappings: MappingJsonWithConditions[];
+    mappings: MappingJsonWithConditions[];
 };
 export type RadarFacilityWithSectors = RadarFacility & {
-  sectors: SectorMappingWithConditions[];
+    sectors: SectorMappingWithConditions[];
 };
 export type SectorMappingWithConditions = SectorMapping & {
-  mappings: MappingJsonWithConditions[];
+    mappings: MappingJsonWithConditions[];
 };
 
 export default async function AirspaceViewer({idsConsolidations}: { idsConsolidations?: IdsConsolidation[], }) {
     const allContainers = await prisma.airspaceConditionContainer.findMany({
-    include: {
-      conditions: true,
-    },
-    orderBy: {
-      order: "asc",
-    },
-  });
-
-  const allVideoMaps = await prisma.videoMap.findMany({
-    where: {
-      NOT: {
-        mappings: {
-          none: {},
-        },
-      },
-    },
-    include: {
-      mappings: {
         include: {
-            airspaceCondition: {
-            include: {
-                container: true,
-            },
-          },
+            conditions: true,
         },
-      },
-    },
-    orderBy: {
-      order: "asc",
-    },
-  });
+        orderBy: {
+            order: "asc",
+        },
+    });
 
-  const allFacilities = await prisma.radarFacility.findMany({
-    include: {
-      sectors: {
-        include: {
-          mappings: {
-            include: {
-                airspaceCondition: {
-                include: {
-                    container: true,
+    const allVideoMaps = await prisma.videoMap.findMany({
+        where: {
+            NOT: {
+                mappings: {
+                    none: {},
                 },
-              },
             },
-          },
         },
-      },
-    },
-    orderBy: {
-      order: "asc",
-    },
-  });
+        include: {
+            mappings: {
+                include: {
+                    airspaceCondition: {
+                        include: {
+                            container: true,
+                        },
+                    },
+                },
+            },
+        },
+        orderBy: {
+            order: "asc",
+        },
+    });
+
+    const allFacilities = (!idsConsolidations || idsConsolidations.length > 0) ? await prisma.radarFacility.findMany({
+        include: {
+            sectors: {
+                include: {
+                    mappings: {
+                        include: {
+                            airspaceCondition: {
+                                include: {
+                                    container: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        orderBy: {
+            order: "asc",
+        },
+    }) : [];
 
     return (
         <Box>
@@ -95,20 +95,22 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
                 <Grid2 size={10}>
                     <AirspaceConditionSelector containers={allContainers as AirspaceContainerWithConditions[]}/>
                 </Grid2>
-                <Grid2 size={{xs: 10, md: 3, xl: 2,}} sx={{minHeight: {xs: 'auto', md: 'calc(100vh - 64px - 96px)',},}}>
-                    <Card sx={{height: '100%',}}>
+                <Grid2 size={{xs: 10, md: 3, xl: 2,}} sx={{height: {xs: 'auto', md: 'calc(100vh - 64px - 96px)',},}}>
+                    <Card sx={{height: '100%', overflow: 'auto',}}>
                         <CardContent>
-                            <Typography variant="h6" textAlign="center" gutterBottom>Map Settings</Typography>
-                            <Divider sx={{my: 2,}}/>
-                            <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
-                            <Divider sx={{my: 2,}}/>
-                            <FacilitySelector allFacilities={allFacilities as RadarFacilityWithSectors[]}
-                                              idsConsolidations={idsConsolidations}/>
+                            <Box sx={{height: '100%',}}>
+                                <Typography variant="h6" textAlign="center" gutterBottom>Map Settings</Typography>
+                                <Divider sx={{my: 2,}}/>
+                                <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
+                                <Divider sx={{my: 2,}}/>
+                                <FacilitySelector allFacilities={allFacilities as RadarFacilityWithSectors[]}
+                                                  idsConsolidations={idsConsolidations}/>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid2>
                 <Grid2 size={{xs: 10, md: 7, xl: 8,}}
-                       sx={{minHeight: {xs: '100vh', md: 'calc(100vh - 64px - 96px)',},}}>
+                       sx={{height: {xs: '100vh', md: 'calc(100vh - 64px - 96px)',},}}>
                     <MapWrapper
                         allConditions={allContainers.flatMap((a) => a.conditions) as AirspaceConditionWithContainer[]}
                         allVideoMaps={allVideoMaps as VideoMapWithMappings[]}

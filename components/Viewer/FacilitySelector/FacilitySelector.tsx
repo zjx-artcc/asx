@@ -54,7 +54,7 @@ export default function FacilitySelector({allFacilities, idsConsolidations,}: {
     }
 
     return (
-        <Box>
+        <Box sx={{display: 'flex', flexDirection: 'column', height: '100%'}}>
             {!idsConsolidations && <>
                 <FacilityAddForm facilities={allFacilities} onSubmit={onAddFacility}/>
                 <Divider sx={{my: 2,}}/>
@@ -63,10 +63,12 @@ export default function FacilitySelector({allFacilities, idsConsolidations,}: {
                         gutterBottom>{idsConsolidations ? 'Online' : 'Selected'} Facilities</Typography>
             {activeFacilities.length === 0 &&
                 <Typography variant="subtitle1" textAlign="center">No facilities selected</Typography>}
-            {activeFacilities.map(facility => (
-                <FacilityAccordion key={facility.id} facility={facility} onDelete={onDeleteFacility}
-                                   disableDelete={!!idsConsolidations}/>
-            ))}
+            <Box sx={{flex: 1, overflow: 'auto'}}>
+                {activeFacilities.map(facility => (
+                    <FacilityAccordion key={facility.id} facility={facility} onDelete={onDeleteFacility}
+                                       disableDelete={!!idsConsolidations} defaultAllSelected={!!idsConsolidations}/>
+                ))}
+            </Box>
         </Box>
     );
 }
