@@ -14,19 +14,22 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
     manualOwnedBy: { [key: string]: string, }
 }) {
 
-    const [displayedAltitudes, setDisplayedAltitudes] = useState<string[]>([]);
+    const [displayedAltitudes, setDisplayedAltitudes] = useState<{
+        name: string,
+        key: string,
+        ownedBy: string,
+        altitude: string,
+    }[]>([]);
     const [lat, setLat] = useState<number>();
     const [lng, setLng] = useState<number>();
     const map = useMap();
 
-    const getSectorName = useCallback((sector: GeoJSONWithColor, ownedBy?: string) => {
-        if (!ownedBy) return sector.json.name;
+    const getOwnerSector = useCallback((sector: GeoJSONWithColor, ownedBy?: string) => {
+        if (!ownedBy) return sector;
 
         const ownedSector = sectors.find(s => s.key === ownedBy);
 
-        if (!ownedSector) return sector.json.name;
-
-        return ownedSector.json.name;
+        return ownedSector || sector;
     }, [sectors]);
 
     const updateCoords = useCallback(() => {
@@ -47,49 +50,40 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
     }, [lat, lng]);
 
     useEffect(() => {
-
         updateCoords();
 
         for (const sector of sectors) {
-
-            // can be at most 1 polygon
             const polygons = getPolygonsContaining(sector.json as unknown as GeoJsonObject);
+            const ownerSector = getOwnerSector(sector, manualOwnedBy[sector.key]);
 
             if (polygons.length > 0) {
-
                 const altitudes: string[] = Object.entries(polygons[0].feature.properties).filter(([k, v]) => k !== 'fid' && !!v).map(([v]) => v);
-
-                const firstNonNullAltitude = altitudes.find(a => !!a);
+                const firstNonNullAltitude = altitudes.find(Boolean);
 
                 if (!firstNonNullAltitude) continue;
 
-                const name = getSectorName(sector, manualOwnedBy[sector.key]);
-
-
                 setDisplayedAltitudes((prev) => {
                     if (!prev) prev = [];
 
-                    const idx = prev.findIndex(a => a.split(": ")[0] === name);
+                    const existingSectorAlt = prev.find(a => a.key === sector.key);
 
-                    if (idx !== -1 && (!manualOwnedBy[sector.key] || manualOwnedBy[sector.key] === sector.key)) {
+                    if (existingSectorAlt && existingSectorAlt.altitude === firstNonNullAltitude) {
                         return prev;
                     }
 
-                    return [...prev, `${name}: ${firstNonNullAltitude}`];
+                    const name = ownerSector.json?.name || ownerSector.key;
+
+                    return [...prev, {name, altitude: firstNonNullAltitude, key: sector.key, ownedBy: ownerSector.key}];
                 });
             } else {
                 setDisplayedAltitudes((prev) => {
-                    if (!prev) prev = [];
-
-                    const name = getSectorName(sector, manualOwnedBy[sector.key]);
-
-                    const idx = prev.findIndex(a => a.startsWith(name));
-
-                    if (idx !== -1 && (!manualOwnedBy[sector.key] || manualOwnedBy[sector.key] === sector.key)) {
-                        return prev.filter(a => !a.startsWith(name));
+                    const uniqueSectors = new Map<string, typeof prev[0]>();
+                    for (let i = prev.length - 1; i >= 0; i--) {
+                        if (!uniqueSectors.has(prev[i].key) && prev[i].key !== sector.key) {
+                            uniqueSectors.set(prev[i].key, prev[i]);
+                        }
                     }
-
-                    return prev;
+                    return Array.from(uniqueSectors.values());
                 });
             }
         }
@@ -97,9 +91,9 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
         return () => {
             map.removeEventListener('mousemove');
         };
-    }, [map, updateCoords, getPolygonsContaining, sectors, getSectorName, manualOwnedBy]);
+    }, [map, updateCoords, getPolygonsContaining, sectors, getOwnerSector, manualOwnedBy]);
 
-    return (
+    return displayedAltitudes.length > 0 && (
         <Paper
             sx={{
                 minWidth: "1vw",
@@ -114,7 +108,7 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
             }}
         >
             {displayedAltitudes.map((a, idx) => (
-                <Typography key={idx}>{a}</Typography>
+                <Typography key={idx}>{a.name}: {a.altitude}</Typography>
             ))}
         </Paper>
     );
