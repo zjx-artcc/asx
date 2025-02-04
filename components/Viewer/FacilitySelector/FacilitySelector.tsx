@@ -13,6 +13,7 @@ export default function FacilitySelector({allFacilities, idsConsolidations,}: {
     idsConsolidations?: IdsConsolidation[],
 }) {
 
+
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -74,6 +75,7 @@ export default function FacilitySelector({allFacilities, idsConsolidations,}: {
 }
 
 const filterFacilitiesAndSectors = (allFacilities: RadarFacilityWithSectors[], filterSectorIds: string[]) => {
+
     return allFacilities
         .filter((f) => f.sectors
             .flatMap((s) => s.idsRadarSectorId)

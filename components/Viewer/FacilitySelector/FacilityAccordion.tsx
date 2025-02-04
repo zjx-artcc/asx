@@ -1,5 +1,5 @@
 'use client';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {RadarFacilityWithSectors, SectorMappingWithConditions} from "@/components/Viewer/AirspaceViewer";
 import {
     Accordion,
@@ -27,6 +27,7 @@ export default function FacilityAccordion({facility, onDelete, disableDelete, de
     const pathname = usePathname();
     const [activeSectors, setActiveSectors] = React.useState<SectorMappingWithConditions[]>([]);
     const [selectAll, setSelectAll] = React.useState(false);
+    const initialSelectionMade = useRef(false);
 
     const selectAllSectors = useCallback((checked: boolean) => {
         setSelectAll(checked);
@@ -50,10 +51,14 @@ export default function FacilityAccordion({facility, onDelete, disableDelete, de
         const activeSectors = facility.sectors.filter(sector => activeSectorIds.includes(sector.id) && sector.radarFacilityId === facility.id);
         setActiveSectors(activeSectors);
         setSelectAll(activeSectors.length === facility.sectors.length);
-        if (defaultAllSelected) {
+    }, [facility, searchParams]);
+
+    useEffect(() => {
+        if (defaultAllSelected && !initialSelectionMade.current) {
             selectAllSectors(true);
+            initialSelectionMade.current = true;
         }
-    }, [defaultAllSelected, facility, searchParams, selectAllSectors]);
+    }, [defaultAllSelected, selectAllSectors]);
 
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         selectAllSectors(event.target.checked);
@@ -66,7 +71,6 @@ export default function FacilityAccordion({facility, onDelete, disableDelete, de
                     <Checkbox
                         checked={selectAll}
                         onChange={handleSelectAll}
-                        disabled={disableDelete}
                     />
                     <Typography>{facility.name} ({activeSectors.length}/{facility.sectors.length})</Typography>
                     <Box>

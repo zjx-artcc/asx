@@ -7,7 +7,7 @@ import {
     SectorMappingWithConditions,
     VideoMapWithMappings
 } from "@/components/Viewer/AirspaceViewer";
-import {useSearchParams} from "next/navigation";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {Card, CardContent, Stack, Typography} from "@mui/material";
 import {Info} from "@mui/icons-material";
 import Map from "@/components/Viewer/Map/Map";
@@ -20,6 +20,8 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
     idsConsolidations?: IdsConsolidation[],
 }) {
 
+    const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
 
     const videoMapIds = searchParams.get('videoMaps')?.split(',').filter(Boolean) ?? [];
@@ -89,37 +91,42 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         );
     }
 
-    const colors: { [key: string]: string, } = {};
+    let colors: { [key: string]: string, } = {};
+
+    const convertedConsolidations: { [key: string]: string } = {};
 
     if (idsConsolidations) {
-        const color = getRandomSharpHexColor();
         for (const idsConsolidation of idsConsolidations) {
+            const color = getRandomSharpHexColor(Object.values(colors));
             const primaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId)?.id);
 
             if (!primaryMap) continue;
 
             colors[primaryMap.jsonKey] = color;
+            convertedConsolidations[primaryMap.jsonKey] = primaryMap.jsonKey;
             for (const secondarySectorId of idsConsolidation.secondarySectorIds) {
                 const secondaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === secondarySectorId)?.id);
 
                 if (!secondaryMap) continue;
 
                 colors[secondaryMap.jsonKey] = color;
+                convertedConsolidations[secondaryMap.jsonKey] = primaryMap.jsonKey;
             }
         }
-    }
 
-    const convertedConsolidations: { [key: string]: string[] } = {};
-
-    if (idsConsolidations) {
-        for (const idsConsolidation of idsConsolidations) {
-            convertedConsolidations[idsConsolidation.primarySectorId] = idsConsolidation.secondarySectorIds;
+        if (!searchParams.get('colors')) {
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.set('colors', JSON.stringify(colors));
+            router.push(`${pathname}?${newSearchParams.toString()}`);
+        } else {
+            colors = JSON.parse(searchParams.get('colors') || '{}');
         }
+
     }
 
     return jsons?.videoJsons && jsons?.sectorJsons && (
         <Map videoMapKeys={jsons.videoJsons.map((j) => j.jsonKey)} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
-             colors={colors} consolidations={convertedConsolidations}/>
+             colors={colors} ownedBy={convertedConsolidations}/>
     );
 
 }
@@ -202,7 +209,7 @@ const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditio
         .filter((airport, index, self) => self.indexOf(airport) === index);
 }
 
-function getRandomSharpHexColor(): string {
+function getRandomSharpHexColor(previousColors: string[] = []): string {
     const hue = Math.floor(Math.random() * 360); // Random hue (0-359)
     const saturation = 90 + Math.random() * 10; // High saturation (90-100%)
     const lightness = 50 + Math.random() * 10; // Moderate brightness (50-60%)
@@ -220,5 +227,10 @@ function getRandomSharpHexColor(): string {
         return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
     };
 
-    return hslToHex(hue, saturation, lightness);
+    let newColor;
+    do {
+        newColor = hslToHex(hue, saturation, lightness);
+    } while (previousColors.includes(newColor));
+
+    return newColor;
 }

@@ -22,6 +22,7 @@
     "@mui/material-nextjs": "^6.1.6",
     "@mui/x-data-grid": "^7.22.2",
     "@prisma/client": "^5.22.0",
+    "@types/react-leaflet": "^2.8.3",
     "leaflet": "^1.9.4",
     "next": "^15.1.6",
     "next-auth": "4.24.10",

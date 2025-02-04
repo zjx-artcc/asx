@@ -68,7 +68,7 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
         },
     });
 
-    const allFacilities = (!idsConsolidations || idsConsolidations.length > 0) ? await prisma.radarFacility.findMany({
+    const allFacilities = await prisma.radarFacility.findMany({
         include: {
             sectors: {
                 include: {
@@ -87,7 +87,7 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
         orderBy: {
             order: "asc",
         },
-    }) : [];
+    });
 
     return (
         <Box>

@@ -5,13 +5,15 @@ import LeafletMap from "@/components/Map/Map";
 import Geojson from "@/components/GeoJSON/GeoJSON";
 import "leaflet/dist/leaflet.css";
 import {useColorScheme} from "@mui/material/styles";
-import Tooltips from "@/components/Tooltips/Tooltips";
+import AltitudeInformationWrapper from "@/components/Tooltips/AltitudeInformationWrapper";
 
-type GeoJSONWithColor = {
+export type GeoJSONWithColor = {
     key: string,
     json: {
+        name: string,
         crs: {
             properties: {
+                name: string,
                 color: string,
             },
         },
@@ -24,16 +26,13 @@ const CENTER_LAT = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LAT']) || 
 const CENTER_LONG = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LONG']) || -77;
 const ZOOM = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_ZOOM']) || 6.5;
 
-export default function Map({videoMapKeys, sectorKeys, colors, consolidations}: {
+export default function Map({videoMapKeys, sectorKeys, colors, ownedBy}: {
     videoMapKeys: string[],
     sectorKeys: string[],
     colors: { // noinspection JSUnusedLocalSymbols
         [key: string]: string,
     },
-    consolidations: {
-        // noinspection JSUnusedLocalSymbols
-        [key: string]: string[],
-    },
+    ownedBy?: { [key: string]: string, },
 }) {
 
     const {colorScheme} = useColorScheme();
@@ -97,7 +96,7 @@ export default function Map({videoMapKeys, sectorKeys, colors, consolidations}: 
                             />
                         ))}
 
-                        <Tooltips sectors={files} consolidations={consolidations}/>
+                        <AltitudeInformationWrapper sectors={files} ownedBy={ownedBy || {}}/>
                     </LeafletMap>
                 </Box>
             </CardContent>
