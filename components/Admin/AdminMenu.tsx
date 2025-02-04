@@ -7,7 +7,7 @@ export default function AdminMenu() {
     return (
         <Card>
             <CardContent>
-                <Typography variant="h6" textAlign="center">I.D.S. Management</Typography>
+                <Typography variant="h6" textAlign="center">A.S.X. Management</Typography>
                 <List>
                     <Link href="/admin" style={{textDecoration: 'none', color: 'inherit',}}>
                         <ListItemButton>
