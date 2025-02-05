@@ -1,5 +1,5 @@
 'use client';
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {RadarFacilityWithSectors, SectorMappingWithConditions} from "@/components/Viewer/AirspaceViewer";
 import {
     Accordion,
@@ -25,8 +25,10 @@ export default function FacilityAccordion({facility, onDelete, disableDelete, de
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
-    const [activeSectors, setActiveSectors] = React.useState<SectorMappingWithConditions[]>([]);
-    const [selectAll, setSelectAll] = React.useState(false);
+    const [activeSectors, setActiveSectors] = useState<SectorMappingWithConditions[]>([]);
+    const [selectAll, setSelectAll] = useState(false);
+    const [open, setOpen] = useState(false);
+
     const initialSelectionMade = useRef(false);
 
     const selectAllSectors = useCallback((checked: boolean) => {
@@ -65,8 +67,12 @@ export default function FacilityAccordion({facility, onDelete, disableDelete, de
     }
 
     return (
-        <Accordion variant="outlined">
-            <AccordionSummary expandIcon={<ExpandMore/>}>
+        <Accordion variant="outlined" expanded={open}>
+            <AccordionSummary expandIcon={
+                <IconButton size="small" onClick={() => setOpen((o) => !o)}>
+                    <ExpandMore/>
+                </IconButton>
+            }>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <Checkbox
                         checked={selectAll}
