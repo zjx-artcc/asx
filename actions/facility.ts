@@ -1,15 +1,16 @@
 'use server';
-import { OrderItem } from "@/components/Admin/Order/OrderList";
+import {OrderItem} from "@/components/Admin/Order/OrderList";
 import prisma from "@/lib/db";
-import { after } from "next/server";
-import { log } from "./log";
-import { GridPaginationModel, GridSortModel, GridFilterItem } from "@mui/x-data-grid";
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { revalidatePath } from "next/cache";
-import { UTApi } from "uploadthing/server";
+import {after} from "next/server";
+import {log} from "./log";
+import {GridFilterItem, GridPaginationModel, GridSortModel} from "@mui/x-data-grid";
+import {Prisma} from "@prisma/client";
+import {z} from "zod";
+import {revalidatePath} from "next/cache";
+import {UTApi} from "uploadthing/server";
 
 const ut = new UTApi();
+const {IDS_RADAR_URL} = process.env;
 
 export const fetchFacilities = async (pagination: GridPaginationModel, sort: GridSortModel, filter?: GridFilterItem) => {
 
@@ -98,11 +99,13 @@ export const createOrUpdateFacility = async (formData: FormData) => {
     const facilityZ = z.object({
         id: z.string().optional(),
         name: z.string().nonempty("Name is required"),
+        ids: z.string().optional(),
     });
 
     const result = facilityZ.safeParse({
         id: formData.get('id') as string,
         name: formData.get('name') as string,
+        ids: formData.get('ids') as string,
     });
 
     if (!result.success) {
@@ -133,6 +136,28 @@ export const createOrUpdateFacility = async (formData: FormData) => {
                 name: result.data.name,
             },
         });
+
+        if (result.data.ids && IDS_RADAR_URL) {
+            const res = await fetch(IDS_RADAR_URL.replace('{id}', result.data.ids));
+            if (!res.ok) return {errors: [{message: 'Invalid I.D.S. Radar Facility ID.  The facility was still created with the given name.'}]};
+
+            const json: {
+                sectors: { id: string, identifier: string, frequency: string, }[],
+            } | null = await res.json();
+
+            if (!json) return {errors: [{message: 'Invalid I.D.S. Radar Facility ID.  The facility was still created with the given name.'}]};
+
+            for (const sector of json.sectors) {
+                await prisma.sectorMapping.create({
+                    data: {
+                        name: sector.identifier,
+                        frequency: sector.frequency,
+                        idsRadarSectorId: sector.id,
+                        radarFacilityId: facility.id,
+                    },
+                });
+            }
+        }
 
         after(async () => {
             await log('CREATE', 'RADAR_FACILITY', `Created facility ${facility.name}`);

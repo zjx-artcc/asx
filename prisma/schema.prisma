@@ -85,7 +85,8 @@ model SectorMapping {
   id               String @id @default(cuid())
   idsRadarSectorId String @unique
 
-  name String
+  name      String
+  frequency String
 
   radarFacility   RadarFacility @relation(fields: [radarFacilityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   radarFacilityId String

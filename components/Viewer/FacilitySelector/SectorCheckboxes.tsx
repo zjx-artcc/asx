@@ -47,11 +47,14 @@ export default function SectorCheckboxes({sectors}: { sectors: SectorMappingWith
             {sectors.map(sector => (
                 <FormControlLabel key={sector.id}
                                   control={<Checkbox id={sector.id} checked={activeSectors.includes(sector)}
-                                                     onChange={handleChange}/>} label={
-                    <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography>{sector.name}</Typography>
-                        {getConditionChips(sector.mappings.flatMap(mapping => mapping.airspaceCondition).filter((ac) => !!ac))}
-                    </Stack>
+                                                     onChange={handleChange}/>} sx={{mb: 2,}} label={
+                    <>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography>{sector.name}</Typography>
+                            {getConditionChips(sector.mappings.flatMap(mapping => mapping.airspaceCondition).filter((ac) => !!ac))}
+                        </Stack>
+                        <Typography variant="subtitle2">{sector.frequency}</Typography>
+                    </>
                 }/>
             ))}
         </FormGroup>

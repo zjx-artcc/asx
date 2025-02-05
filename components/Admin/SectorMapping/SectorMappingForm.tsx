@@ -1,13 +1,11 @@
 'use client';
-import { Box, TextField } from "@mui/material";
-
-import { Stack } from "@mui/material";
-import { RadarFacility, SectorMapping } from "@prisma/client";
+import {Box, Stack, TextField} from "@mui/material";
+import {RadarFacility, SectorMapping} from "@prisma/client";
 import Form from "next/form";
 import FormSaveButton from "../Form/FormSaveButton";
-import { createOrUpdateSectorMapping } from "@/actions/sectorMapping";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+import {createOrUpdateSectorMapping} from "@/actions/sectorMapping";
+import {toast} from "react-toastify";
+import {useRouter} from "next/navigation";
 
 export default function SectorMappingForm({ radarFacility, sectorMapping }: { radarFacility: RadarFacility, sectorMapping?: SectorMapping }) {
 
@@ -33,7 +31,12 @@ export default function SectorMappingForm({ radarFacility, sectorMapping }: { ra
             <input type="hidden" name="radarFacilityId" value={radarFacility.id} />
             <Stack direction="column" spacing={2}>
                 <TextField name="name" label="Name *" variant="filled" defaultValue={sectorMapping?.name} fullWidth />
-                <TextField name="idsRadarSectorId" helperText="The ID will be located in the URL and in the Edit window of each sector: /admin/radars/<RADAR FACILITY>/sectors/<SECTOR ID>" label="IDS Radar Sector ID *" placeholder="This must be EXACTLY the ID displayed in the IDS." variant="filled" defaultValue={sectorMapping?.idsRadarSectorId || ''} fullWidth />
+                <TextField name="frequency" label="Frequency *" variant="filled" defaultValue={sectorMapping?.frequency}
+                           fullWidth/>
+                <TextField name="idsRadarSectorId"
+                           helperText="This will be used for radar consolidations.  The ID will be located in the URL and in the Edit window of each sector: /admin/radars/<RADAR FACILITY>/sectors/<SECTOR ID>"
+                           label="IDS Radar Sector ID *" placeholder="This must be EXACTLY the ID displayed in the IDS."
+                           variant="filled" defaultValue={sectorMapping?.idsRadarSectorId || ''} fullWidth/>
                 <Box>
                     <FormSaveButton />
                 </Box>

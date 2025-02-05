@@ -12,6 +12,8 @@ import {revalidatePath} from "next/cache";
 
 const ut = new UTApi();
 
+const {IDS_SECTOR_URL} = process.env;
+
 export const updateSectorMappingJsons = async (deleteIds: string[], newMappings: NewMapping[]) => {
 
     for (const id of deleteIds) {
@@ -65,12 +67,43 @@ export const updateSectorMappingJsons = async (deleteIds: string[], newMappings:
     return true;
 }
 
+export const addFromIds = async (facilityId: string, sectorId: string) => {
+    if (!IDS_SECTOR_URL || !facilityId || !sectorId) return 'Missing required parameters.';
+    const res = await fetch(IDS_SECTOR_URL.replace('{id}', sectorId));
+    if (!res.ok) {
+        return 'Failed to fetch sector from IDS.';
+    }
+
+    const data = await res.json();
+    if (!data) {
+        return 'Failed to fetch sector from IDS.';
+    }
+
+    const sm = await prisma.sectorMapping.create({
+        data: {
+            radarFacilityId: facilityId,
+            name: data.identifier,
+            frequency: data.frequency,
+            idsRadarSectorId: sectorId,
+        },
+    });
+
+    revalidatePath(`/admin/facilities/${facilityId}/sectors`);
+
+    after(async () => {
+        if (sm) {
+            await log('CREATE', 'SECTOR_MAPPING', `Created sector mapping '${sm.name}' from IDS.`);
+        }
+    });
+}
+
 export const createOrUpdateSectorMapping = async (formData: FormData) => {
     
     const smZ = z.object({
         id: z.string().optional(),
         radarFacilityId: z.string().nonempty("Radar Facility ID is required."),
         name: z.string().nonempty("Name is required."),
+        frequency: z.string().nonempty("Frequency is required."),
         idsRadarSectorId: z.string().nonempty("IDS Radar Sector ID is required."),
     });
 
@@ -78,6 +111,7 @@ export const createOrUpdateSectorMapping = async (formData: FormData) => {
         id: formData.get('id') as string,
         radarFacilityId: formData.get('radarFacilityId') as string,
         name: formData.get('name') as string,
+        frequency: formData.get('frequency') as string,
         idsRadarSectorId: formData.get('idsRadarSectorId') as string,
     });
 
@@ -92,6 +126,7 @@ export const createOrUpdateSectorMapping = async (formData: FormData) => {
             },
             data: {
                 name: result.data.name,
+                frequency: result.data.frequency,
                 idsRadarSectorId: result.data.idsRadarSectorId,
             },
         });
@@ -108,6 +143,7 @@ export const createOrUpdateSectorMapping = async (formData: FormData) => {
             data: {
                 radarFacilityId: result.data.radarFacilityId,
                 name: result.data.name,
+                frequency: result.data.frequency,
                 idsRadarSectorId: result.data.idsRadarSectorId,
             },
         });

@@ -14,6 +14,7 @@ import VideoMapSelector from "@/components/Viewer/VideoMapSelector/VideoMapSelec
 import FacilitySelector from "@/components/Viewer/FacilitySelector/FacilitySelector";
 import MapWrapper from "@/components/Viewer/Map/MapWrapper";
 import {IdsConsolidation} from "@/app/active-consolidations/page";
+import ResetColorsButton from "@/components/Viewer/ResetColorsButton";
 
 export type AirspaceConditionWithContainer = AirspaceCondition & {
     container: AirspaceConditionContainer;
@@ -95,11 +96,13 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
                 <Grid2 size={10}>
                     <AirspaceConditionSelector containers={allContainers as AirspaceContainerWithConditions[]}/>
                 </Grid2>
-                <Grid2 size={{xs: 10, md: 3, xl: 2,}} sx={{height: {xs: 'auto', md: 'calc(100vh - 64px - 96px)',},}}>
+                <Grid2 size={{xs: 10, md: 3, xl: 2,}} sx={{height: {xs: '300px', md: 'calc(100vh - 64px - 96px)',},}}>
                     <Card sx={{height: '100%', overflow: 'auto',}}>
                         <CardContent>
                             <Box sx={{height: '100%',}}>
-                                <Typography variant="h6" textAlign="center" gutterBottom>Map Settings</Typography>
+                                <Typography variant="h6" textAlign="center" gutterBottom>Map
+                                    Settings {idsConsolidations && <ResetColorsButton/>}</Typography>
+
                                 <Divider sx={{my: 2,}}/>
                                 <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
                                 <Divider sx={{my: 2,}}/>

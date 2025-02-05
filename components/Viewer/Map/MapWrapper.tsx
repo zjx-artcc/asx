@@ -118,7 +118,7 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
             const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.set('colors', JSON.stringify(colors));
             router.push(`${pathname}?${newSearchParams.toString()}`);
-        } else {
+        } else if (idsConsolidations) {
             colors = JSON.parse(searchParams.get('colors') || '{}');
         }
 

@@ -11,7 +11,9 @@ import {Paper, Typography} from "@mui/material";
 
 export default function AltitudeInformation({sectors, manualOwnedBy}: {
     sectors: GeoJSONWithColor[],
-    manualOwnedBy: { [key: string]: string, }
+    manualOwnedBy: { // noinspection JSUnusedLocalSymbols
+        [key: string]: string,
+    }
 }) {
 
     const [displayedAltitudes, setDisplayedAltitudes] = useState<{
@@ -58,9 +60,34 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
 
             if (polygons.length > 0) {
                 const altitudes: string[] = Object.entries(polygons[0].feature.properties).filter(([k, v]) => k !== 'fid' && !!v).map(([v]) => v);
-                const firstNonNullAltitude = altitudes.find(Boolean);
+                let firstNonNullAltitude = altitudes.find(Boolean);
 
                 if (!firstNonNullAltitude) continue;
+
+                const splitShelves = firstNonNullAltitude.split(' - ');
+
+                for (const shelf of splitShelves) {
+                    let altitudeComponents = shelf.replace('FL', '').replace('SFC', '000').split(' ');
+
+                    if (altitudeComponents.length !== 2) continue;
+
+                    const allNumbers = altitudeComponents.every(c => !isNaN(Number(c)));
+
+                    if (!allNumbers) continue;
+
+                    if (Number(altitudeComponents[1]) < Number(altitudeComponents[0])) {
+                        altitudeComponents.reverse();
+                    }
+
+                    altitudeComponents = altitudeComponents.map(c => Number(c) >= 180 ? `FL${c}` : c).map(c => Number(c) === 0 ? 'SFC' : c);
+
+                    const newShelf = altitudeComponents.join('-');
+
+                    const shelfIdx = splitShelves.indexOf(shelf);
+                    splitShelves[shelfIdx] = newShelf;
+                }
+
+                firstNonNullAltitude = splitShelves.join(' / ');
 
                 setDisplayedAltitudes((prev) => {
                     if (!prev) prev = [];
@@ -107,8 +134,9 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
                 p: 2,
             }}
         >
-            {displayedAltitudes.map((a, idx) => (
-                <Typography key={idx}>{a.name}: {a.altitude}</Typography>
+            <Typography variant="subtitle2" textAlign="center" gutterBottom>Sector Altitudes</Typography>
+            {displayedAltitudes.sort((a, b) => a.name.localeCompare(b.name)).map((a, idx) => (
+                <Typography key={a.key + idx} variant="body2">{a.name}: <b>{a.altitude}</b></Typography>
             ))}
         </Paper>
     );
