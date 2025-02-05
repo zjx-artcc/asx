@@ -141,7 +141,7 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
                 .map((a, idx) => (
                     <Typography key={a.key + idx}
                                 variant="body2">{a.name}: <b>{a.altitude.replace('000', 'SFC')}</b></Typography>
-            ))}
+                ))}
         </Paper>
     );
 }

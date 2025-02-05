@@ -94,15 +94,18 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
     let colors: { [key: string]: string, } = {};
 
     const convertedConsolidations: { [key: string]: string } = {};
+    const colorLegend: { color: string, name: string, frequency: string, }[] = [];
 
     if (idsConsolidations) {
         for (const idsConsolidation of idsConsolidations) {
             const color = getRandomSharpHexColor(Object.values(colors));
+            const primarySector = sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId);
             const primaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId)?.id);
 
-            if (!primaryMap) continue;
+            if (!primaryMap || !primarySector) continue;
 
             colors[primaryMap.jsonKey] = color;
+            // colorLegend.push({color, name: primarySector?.name || 'UNK', frequency: primarySector?.frequency || 'test' });
             convertedConsolidations[primaryMap.jsonKey] = primaryMap.jsonKey;
             for (const secondarySectorId of idsConsolidation.secondarySectorIds) {
                 const secondaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === secondarySectorId)?.id);
@@ -114,19 +117,25 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
             }
         }
 
-        if (!searchParams.get('colors')) {
+        if (!searchParams.get('colors') || Object.keys(JSON.parse(searchParams.get('colors') || '{}')).length !== Object.keys(convertedConsolidations).length) {
             const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.set('colors', JSON.stringify(colors));
             router.push(`${pathname}?${newSearchParams.toString()}`);
         } else if (idsConsolidations) {
             colors = JSON.parse(searchParams.get('colors') || '{}');
+            for (const [jsonKey, color] of Object.entries(colors)) {
+                const sector = sectors.filter(s => idsConsolidations.map(i => i.primarySectorId).includes(s.idsRadarSectorId)).find((s) => s.mappings.map(m => m.jsonKey).includes(jsonKey));
+                if (!sector) continue;
+                colorLegend.push({color, name: sector.name || 'UNK', frequency: sector.frequency || '199.998'});
+            }
         }
 
     }
 
+
     return jsons?.videoJsons && jsons?.sectorJsons && (
         <Map videoMapKeys={jsons.videoJsons.map((j) => j.jsonKey)} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
-             colors={colors} ownedBy={convertedConsolidations}/>
+             colors={colors} ownedBy={convertedConsolidations} colorLegend={colorLegend}/>
     );
 
 }
@@ -210,9 +219,9 @@ const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditio
 }
 
 function getRandomSharpHexColor(previousColors: string[] = []): string {
-    const hue = Math.floor(Math.random() * 360); // Random hue (0-359)
-    const saturation = 90 + Math.random() * 10; // High saturation (90-100%)
-    const lightness = 50 + Math.random() * 10; // Moderate brightness (50-60%)
+    const hueStep = 120; // Minimum difference in hue between consecutive colors
+    let hue: number;
+    let newColor;
 
     const hslToHex = (h: number, s: number, l: number): string => {
         s /= 100;
@@ -227,10 +236,13 @@ function getRandomSharpHexColor(previousColors: string[] = []): string {
         return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
     };
 
-    let newColor;
     do {
-        newColor = hslToHex(hue, saturation, lightness);
-    } while (previousColors.includes(newColor));
+        hue = Math.floor(Math.random() * 360);
+        newColor = hslToHex(hue, 100, 50);
+    } while (previousColors.some(color => {
+        const prevHue = parseInt(color.slice(1, 3), 16);
+        return Math.abs(prevHue - hue) < hueStep;
+    }));
 
     return newColor;
 }

@@ -1,11 +1,12 @@
 'use client';
 import React, {useEffect} from 'react';
 import {Box, Card, CardContent} from "@mui/material";
-import LeafletMap from "@/components/Map/Map";
+import LeafletMap from "@/components/Viewer/LeafletMap/Map";
 import Geojson from "@/components/GeoJSON/GeoJSON";
 import "leaflet/dist/leaflet.css";
 import {useColorScheme} from "@mui/material/styles";
-import AltitudeInformationWrapper from "@/components/Tooltips/AltitudeInformationWrapper";
+import AltitudeInformationWrapper from "@/components/Viewer/Tooltips/AltitudeInformationWrapper";
+import ColorLegendWrapper from "@/components/Viewer/Tooltips/ColorLegendWrapper";
 
 export type GeoJSONWithColor = {
     key: string,
@@ -26,13 +27,14 @@ const CENTER_LAT = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LAT']) || 
 const CENTER_LONG = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_CENTER_LONG']) || -77;
 const ZOOM = Number(process.env['NEXT_PUBLIC_MAP_DEFAULT_ZOOM']) || 6.5;
 
-export default function Map({videoMapKeys, sectorKeys, colors, ownedBy}: {
+export default function Map({videoMapKeys, sectorKeys, colors, ownedBy, colorLegend}: {
     videoMapKeys: string[],
     sectorKeys: string[],
     colors: { // noinspection JSUnusedLocalSymbols
         [key: string]: string,
     },
     ownedBy?: { [key: string]: string, },
+    colorLegend: { color: string, name: string, frequency: string, }[],
 }) {
 
     const {colorScheme} = useColorScheme();
@@ -97,6 +99,7 @@ export default function Map({videoMapKeys, sectorKeys, colors, ownedBy}: {
                         ))}
 
                         <AltitudeInformationWrapper sectors={files} ownedBy={ownedBy || {}}/>
+                        <ColorLegendWrapper colorLegend={colorLegend}/>
                     </LeafletMap>
                 </Box>
             </CardContent>

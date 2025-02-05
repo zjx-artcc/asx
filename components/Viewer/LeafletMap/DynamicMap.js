@@ -1,9 +1,9 @@
 import * as ReactLeaflet from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
-const { MapContainer } = ReactLeaflet;
+const {MapContainer} = ReactLeaflet;
 
-const Map = ({ children, ...rest }) => {
+const Map = ({children, ...rest}) => {
 
 //   useEffect(() => {
 //     (async function init() {
@@ -16,11 +16,11 @@ const Map = ({ children, ...rest }) => {
 //     })();
 //   }, []);
 
-  return (
-    <MapContainer {...rest}>        
-      {children}
-    </MapContainer>
-  );
+    return (
+        <MapContainer {...rest}>
+            {children}
+        </MapContainer>
+    );
 };
 
 export default Map;
