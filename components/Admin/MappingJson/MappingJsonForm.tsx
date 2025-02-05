@@ -156,7 +156,7 @@ export default function MappingJsonForm({parent, mappings: existingMappings = []
                         <Stack direction="column" spacing={1}>
                             <Typography variant="subtitle2">JSON file</Typography>
                             <input type="hidden" name="parentId" value={parent.id} />
-                            <input type="file" name="file" accept="application/json" />
+                            <input type="file" name="file" accept=".json,.geojson"/>
                             <Autocomplete 
                                 options={allConditions}
                                 getOptionLabel={(option) => `${option.container.name}/${option.name}`}
