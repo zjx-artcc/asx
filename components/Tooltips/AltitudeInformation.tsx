@@ -79,7 +79,7 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
                         altitudeComponents.reverse();
                     }
 
-                    altitudeComponents = altitudeComponents.map(c => Number(c) >= 180 ? `FL${c}` : c).map(c => Number(c) === 0 ? 'SFC' : c);
+                    altitudeComponents = altitudeComponents.map(c => Number(c) === 0 ? '000' : c);
 
                     const newShelf = altitudeComponents.join('-');
 
@@ -139,7 +139,8 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .sort((a, b) => a.altitude.localeCompare(b.altitude))
                 .map((a, idx) => (
-                <Typography key={a.key + idx} variant="body2">{a.name}: <b>{a.altitude}</b></Typography>
+                    <Typography key={a.key + idx}
+                                variant="body2">{a.name}: <b>{a.altitude.replace('000', 'SFC')}</b></Typography>
             ))}
         </Paper>
     );
