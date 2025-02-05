@@ -86,7 +86,7 @@ model SectorMapping {
   idsRadarSectorId String @unique
 
   name      String
-  frequency String
+  frequency String @default("199.998")
 
   radarFacility   RadarFacility @relation(fields: [radarFacilityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   radarFacilityId String
