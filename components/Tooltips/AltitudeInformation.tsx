@@ -135,7 +135,10 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
             }}
         >
             <Typography variant="subtitle2" textAlign="center" gutterBottom>Sector Altitudes</Typography>
-            {displayedAltitudes.sort((a, b) => a.name.localeCompare(b.name)).map((a, idx) => (
+            {displayedAltitudes
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .sort((a, b) => a.altitude.localeCompare(b.altitude))
+                .map((a, idx) => (
                 <Typography key={a.key + idx} variant="body2">{a.name}: <b>{a.altitude}</b></Typography>
             ))}
         </Paper>
