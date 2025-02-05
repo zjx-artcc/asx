@@ -100,7 +100,12 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
 
                     const name = ownerSector.json?.name || ownerSector.key;
 
-                    return [...prev, {name, altitude: firstNonNullAltitude, key: sector.key, ownedBy: ownerSector.key}];
+                    return [...prev.filter((p) => p.key !== sector.key), {
+                        name,
+                        altitude: firstNonNullAltitude,
+                        key: sector.key,
+                        ownedBy: ownerSector.key
+                    }];
                 });
             } else {
                 setDisplayedAltitudes((prev) => {
