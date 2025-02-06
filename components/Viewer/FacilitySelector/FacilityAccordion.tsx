@@ -22,6 +22,8 @@ export default function FacilityAccordion({facility, onDelete, disableDelete, de
     defaultAllSelected?: boolean,
 }) {
 
+    console.log(facility);
+
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();

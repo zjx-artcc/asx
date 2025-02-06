@@ -76,6 +76,8 @@ model RadarFacility {
   id   String @id @default(cuid())
   name String @unique
 
+  autoSelectActiveConsolidations Boolean @default(false)
+
   sectors SectorMapping[]
 
   order Int @default(0)

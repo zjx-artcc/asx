@@ -39,14 +39,14 @@ export default function VideoMapSelector({allVideoMaps}: { allVideoMaps: VideoMa
     }
 
     return (
-        <Autocomplete
+        (<Autocomplete
             multiple
             fullWidth
             options={allVideoMaps}
             limitTags={3}
             renderTags={(values, getTagProps) => values.map((value, index) => (
                 // eslint-disable-next-line react/jsx-key
-                <Chip size="small" label={value.name} {...getTagProps({index,})} />
+                (<Chip size="small" label={value.name} {...getTagProps({index,})} />)
             ))}
             onChange={handleChange}
             value={selectedVideoMaps}
@@ -65,6 +65,6 @@ export default function VideoMapSelector({allVideoMaps}: { allVideoMaps: VideoMa
                     </Box>
                 )
             }}
-        />
+        />)
     );
 }

@@ -67,7 +67,8 @@ export default function FacilitySelector({allFacilities, idsConsolidations,}: {
             <Box sx={{flex: 1, overflow: 'auto'}}>
                 {activeFacilities.map(facility => (
                     <FacilityAccordion key={facility.id} facility={facility} onDelete={onDeleteFacility}
-                                       disableDelete={!!idsConsolidations} defaultAllSelected={!!idsConsolidations}/>
+                                       disableDelete={!!idsConsolidations}
+                                       defaultAllSelected={!!idsConsolidations && facility.autoSelectActiveConsolidations}/>
                 ))}
             </Box>
         </Box>

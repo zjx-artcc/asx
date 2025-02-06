@@ -5,8 +5,15 @@ import Link from "next/link";
 
 export default function Logo() {
     return (
-        <Link href="/">
-            <Image src={logo} alt={"Washington ARTCC Logo"} width={215}/>
-        </Link>
+        (<Link href="/">
+            <Image
+                src={logo}
+                alt={"Washington ARTCC Logo"}
+                width={215}
+                style={{
+                    maxWidth: "100%",
+                    height: "auto"
+                }}/>
+        </Link>)
     );
 }

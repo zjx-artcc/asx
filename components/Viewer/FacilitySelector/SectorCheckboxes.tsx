@@ -44,7 +44,7 @@ export default function SectorCheckboxes({sectors}: { sectors: SectorMappingWith
 
     return (
         <FormGroup>
-            {sectors.map(sector => (
+            {sectors.sort((a, b) => a.name.localeCompare(b.name)).map(sector => (
                 <FormControlLabel key={sector.id}
                                   control={<Checkbox id={sector.id} checked={activeSectors.includes(sector)}
                                                      onChange={handleChange}/>} sx={{mb: 2,}} label={

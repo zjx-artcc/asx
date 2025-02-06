@@ -99,13 +99,15 @@ export const createOrUpdateFacility = async (formData: FormData) => {
     const facilityZ = z.object({
         id: z.string().optional(),
         name: z.string().nonempty("Name is required"),
+        autoSelectActiveConsolidations: z.boolean(),
         ids: z.string().optional(),
     });
 
     const result = facilityZ.safeParse({
         id: formData.get('id') as string,
         name: formData.get('name') as string,
-        ids: formData.get('ids') as string,
+        autoSelectActiveConsolidations: formData.get('autoSelectActiveConsolidations') === 'on',
+        ids: formData.get('ids') as string || '',
     });
 
     if (!result.success) {
@@ -119,6 +121,7 @@ export const createOrUpdateFacility = async (formData: FormData) => {
             },
             data: {
                 name: result.data.name,
+                autoSelectActiveConsolidations: result.data.autoSelectActiveConsolidations,
             },
         });
 
@@ -134,6 +137,7 @@ export const createOrUpdateFacility = async (formData: FormData) => {
         const facility = await prisma.radarFacility.create({
             data: {
                 name: result.data.name,
+                autoSelectActiveConsolidations: result.data.autoSelectActiveConsolidations,
             },
         });
 

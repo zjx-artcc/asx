@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <Container maxWidth="md" sx={{ mt: 10,}}>
+      (<Container maxWidth="md" sx={{mt: 10,}}>
       <Grid2 container spacing={4} columns={2}>
         <Grid2 size={{ xs: 2, md: 1, }}>
           <Link href="/active-consolidations" style={{color: 'inherit', textDecoration: 'none',}}>
@@ -15,8 +15,14 @@ export default function Home() {
               <CardActionArea>
                 <CardMedia title="Active Radar Consolidations">
                   <div style={{position: 'relative', width: '100%', height: 200,}}>
-                    <Image src={activeConsolidations} alt="Active Radar Consolidations" layout="fill"
-                           objectFit="cover"/>
+                      <Image
+                          src={activeConsolidations}
+                          alt="Active Radar Consolidations"
+                          fill
+                          sizes="100vw"
+                          style={{
+                              objectFit: "cover"
+                          }}/>
                   </div>
                 </CardMedia>
                 <CardContent>
@@ -34,7 +40,14 @@ export default function Home() {
               <CardActionArea sx={{height: '100%',}}>
                 <CardMedia title="Active Radar Consolidations">
                   <div style={{position: 'relative', width: '100%', height: 200,}}>
-                    <Image src={airspaceExplorer} alt="Airspace Explorer" layout="fill" objectFit="cover"/>
+                      <Image
+                          src={airspaceExplorer}
+                          alt="Airspace Explorer"
+                          fill
+                          sizes="100vw"
+                          style={{
+                              objectFit: "cover"
+                          }}/>
                   </div>
                 </CardMedia>
                 <CardContent>
@@ -47,6 +60,6 @@ export default function Home() {
           </Link>
         </Grid2>
       </Grid2>
-      </Container>
+      </Container>)
   );
 }
