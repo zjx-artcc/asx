@@ -15,7 +15,7 @@ export default async function Page() {
 
     const res = await fetch(IDS_CONSOLIDATIONS_URL || '', {
         next: {
-            revalidate: 60,
+            revalidate: 10,
         },
     });
 

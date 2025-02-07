@@ -125,7 +125,9 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
         };
     }, [map, updateCoords, getPolygonsContaining, sectors, getOwnerSector, manualOwnedBy]);
 
-    return displayedAltitudes.length > 0 && (
+    const filteredDisplayedAltitudes = displayedAltitudes.filter((a) => sectors.map((s) => s.key).includes(a.key));
+
+    return filteredDisplayedAltitudes.length > 0 && (
         <Paper
             sx={{
                 minWidth: "1vw",
@@ -140,7 +142,7 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
             }}
         >
             <Typography variant="subtitle2" textAlign="center" gutterBottom>Sector Altitudes</Typography>
-            {displayedAltitudes
+            {filteredDisplayedAltitudes
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .sort((a, b) => a.altitude.localeCompare(b.altitude))
                 .map((a, idx) => (

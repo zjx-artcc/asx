@@ -32,8 +32,9 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
 
     let sectors: SectorMappingWithConditions[] = [];
 
+    const allSectors = allFacilities.flatMap(facility => facility.sectors);
+
     if (sectorIds.length > 0) {
-        const allSectors = allFacilities.flatMap(facility => facility.sectors);
         sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
         if (idsConsolidations) {
             idsConsolidations
@@ -48,6 +49,19 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
                     sectors.push(...consolidatedSectors);
                 });
         }
+    }
+
+    if (idsConsolidations && !sectorIds
+        .every((si) =>
+            allSectors.filter((s) =>
+                idsConsolidations.map((i) => i.primarySectorId)
+                    .includes(s.idsRadarSectorId))
+                .map((s) => s.id)
+                .includes(si))) {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('sectors');
+        router.push(`${pathname}?${newSearchParams.toString()}`);
+        // toast.warning('The active split has changed to something that makes your configuration invalid.  The page has refreshed.')
     }
 
     const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
@@ -218,31 +232,18 @@ const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditio
         .filter((airport, index, self) => self.indexOf(airport) === index);
 }
 
-function getRandomSharpHexColor(previousColors: string[] = []): string {
-    const hueStep = 120; // Minimum difference in hue between consecutive colors
-    let hue: number;
-    let newColor;
+function getRandomSharpHexColor(previousColors: string[]): string {
+    const distinctColors = [
+        "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF",
+        "#800000", "#808000", "#008000", "#800080", "#808080", "#008080",
+        "#C0C0C0", "#FFA500", "#A52A2A", "#7FFF00", "#D2691E", "#DC143C",
+        "#FF1493", "#00BFFF", "#4B0082", "#32CD32", "#FFD700", "#20B2AA",
+        "#FF4500", "#DA70D6", "#B0C4DE", "#9370DB", "#3CB371", "#7B68EE",
+        "#ADFF2F", "#BA55D3", "#F08080", "#E6E6FA", "#90EE90", "#FF6347",
+        "#4682B4", "#9ACD32", "#EE82EE", "#6A5ACD", "#708090", "#2E8B57",
+        "#9932CC", "#8B0000", "#556B2F", "#9400D3", "#696969", "#8B008B",
+        "#B22222", "#5F9EA0"
+    ];
 
-    const hslToHex = (h: number, s: number, l: number): string => {
-        s /= 100;
-        l /= 100;
-
-        const k = (n: number) => (n + h / 30) % 12;
-        const a = s * Math.min(l, 1 - l);
-        const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-
-        const toHex = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
-
-        return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
-    };
-
-    do {
-        hue = Math.floor(Math.random() * 360);
-        newColor = hslToHex(hue, 100, 50);
-    } while (previousColors.some(color => {
-        const prevHue = parseInt(color.slice(1, 3), 16);
-        return Math.abs(prevHue - hue) < hueStep;
-    }));
-
-    return newColor;
+    return distinctColors[previousColors.length % distinctColors.length];
 }
