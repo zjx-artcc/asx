@@ -14,7 +14,6 @@ import VideoMapSelector from "@/components/Viewer/VideoMapSelector/VideoMapSelec
 import FacilitySelector from "@/components/Viewer/FacilitySelector/FacilitySelector";
 import MapWrapper from "@/components/Viewer/Map/MapWrapper";
 import {IdsConsolidation} from "@/app/active-consolidations/page";
-import ResetColorsButton from "@/components/Viewer/ResetColorsButton";
 
 export type AirspaceConditionWithContainer = AirspaceCondition & {
     container: AirspaceConditionContainer;
@@ -105,7 +104,7 @@ export default async function AirspaceViewer({idsConsolidations, defaultConditio
                         <CardContent>
                             <Box sx={{height: '100%',}}>
                                 <Typography variant="h6" textAlign="center" gutterBottom>Map
-                                    Settings {idsConsolidations && <ResetColorsButton/>}</Typography>
+                                    Settings</Typography>
 
                                 <Divider sx={{my: 2,}}/>
                                 <VideoMapSelector allVideoMaps={allVideoMaps as VideoMapWithMappings[]}/>
