@@ -131,6 +131,15 @@ model AirspaceCondition {
   containerId String
 
   mappings MappingJson[]
+
+  defaultInActive   ActiveConsolidationsDefaultConditions? @relation(fields: [defaultInActiveId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  defaultInActiveId String?
+}
+
+model ActiveConsolidationsDefaultConditions {
+  id String @id @default(cuid())
+
+  conditions AirspaceCondition[]
 }
 
 enum LogType {

@@ -35,7 +35,10 @@ export type SectorMappingWithConditions = SectorMapping & {
     mappings: MappingJsonWithConditions[];
 };
 
-export default async function AirspaceViewer({idsConsolidations}: { idsConsolidations?: IdsConsolidation[], }) {
+export default async function AirspaceViewer({idsConsolidations, defaultConditions}: {
+    idsConsolidations?: IdsConsolidation[],
+    defaultConditions?: AirspaceCondition[],
+}) {
     const allContainers = await prisma.airspaceConditionContainer.findMany({
         include: {
             conditions: true,
@@ -94,7 +97,8 @@ export default async function AirspaceViewer({idsConsolidations}: { idsConsolida
         <Box>
             <Grid2 container columns={10} spacing={2} sx={{my: 2, mx: 2,}}>
                 <Grid2 size={10}>
-                    <AirspaceConditionSelector containers={allContainers as AirspaceContainerWithConditions[]}/>
+                    <AirspaceConditionSelector containers={allContainers as AirspaceContainerWithConditions[]}
+                                               defaultActiveIds={defaultConditions?.map((c) => c.id)}/>
                 </Grid2>
                 <Grid2 size={{xs: 10, md: 3, xl: 2,}} sx={{height: {xs: '300px', md: 'calc(100vh - 64px - 96px)',},}}>
                     <Card sx={{height: '100%', overflow: 'auto',}}>

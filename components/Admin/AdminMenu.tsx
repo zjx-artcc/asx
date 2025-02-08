@@ -1,7 +1,7 @@
 import {Card, CardContent, List, ListItemButton, ListItemIcon, ListItemText, Typography} from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import {Home, ListAlt, Radar, Tune, Wallpaper,} from "@mui/icons-material";
+import {Home, ListAlt, Radar, ToggleOn, Tune, Wallpaper,} from "@mui/icons-material";
 
 export default function AdminMenu() {
     return (
@@ -41,6 +41,16 @@ export default function AdminMenu() {
                             <ListItemText primary="Video Maps"/>
                         </ListItemButton>
                     </Link>
+
+                    <Link href="/admin/defaults" style={{textDecoration: 'none', color: 'inherit',}}>
+                        <ListItemButton>
+                            <ListItemIcon>
+                                <ToggleOn/>
+                            </ListItemIcon>
+                            <ListItemText primary="Default Active Conditions"/>
+                        </ListItemButton>
+                    </Link>
+
 
                     <Link href="/admin/logs" style={{textDecoration: 'none', color: 'inherit',}}>
                         <ListItemButton>

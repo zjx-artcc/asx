@@ -3,6 +3,7 @@ import AirspaceViewer from "@/components/Viewer/AirspaceViewer";
 import {Button, Card, CardContent, Container, Stack, Typography} from "@mui/material";
 import {Home, Info} from "@mui/icons-material";
 import Link from "next/link";
+import prisma from "@/lib/db";
 
 const {IDS_CONSOLIDATIONS_URL} = process.env;
 
@@ -45,7 +46,13 @@ export default async function Page() {
 
     const data: IdsConsolidation[] = await res.json();
 
+    const defaultConditions = await prisma.activeConsolidationsDefaultConditions.findFirst({
+        include: {
+            conditions: true,
+        },
+    });
+
     return (
-        <AirspaceViewer idsConsolidations={data}/>
+        <AirspaceViewer idsConsolidations={data} defaultConditions={defaultConditions?.conditions || []}/>
     );
 }

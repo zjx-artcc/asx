@@ -7,12 +7,22 @@ import AirspaceConditionAddButton from "@/components/Viewer/AirspaceCondition/Ai
 import {AirspaceCondition} from "@prisma/client";
 import AirspaceConditionDialog from "@/components/Viewer/AirspaceCondition/AirspaceConditionDialog";
 
-export default function AirspaceConditionSelector({containers}: { containers: AirspaceContainerWithConditions[], }) {
+export default function AirspaceConditionSelector({containers, defaultActiveIds,}: {
+    containers: AirspaceContainerWithConditions[],
+    defaultActiveIds?: string[],
+}) {
 
     const router = useRouter();
     const pathname = usePathname();
     const conditions = containers.flatMap(airport => airport.conditions);
     const searchParams = useSearchParams();
+
+    if (!searchParams.has('conditions') && defaultActiveIds) {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('conditions', defaultActiveIds.join(','));
+        router.push(`${pathname}?${newSearchParams.toString()}`);
+    }
+
     const activeConditions = conditions.filter(condition => searchParams.get('conditions')?.split(',').includes(condition.id));
 
     const [editOpen, setEditOpen] = useState(false);
