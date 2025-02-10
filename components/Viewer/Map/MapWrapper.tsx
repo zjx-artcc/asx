@@ -7,7 +7,7 @@ import {
     SectorMappingWithConditions,
     VideoMapWithMappings
 } from "@/components/Viewer/AirspaceViewer";
-import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {useSearchParams} from "next/navigation";
 import {Card, CardContent, Stack, Typography} from "@mui/material";
 import {Info} from "@mui/icons-material";
 import Map from "@/components/Viewer/Map/Map";
@@ -20,8 +20,6 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
     idsConsolidations?: IdsConsolidation[],
 }) {
 
-    const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
 
     const videoMapIds = searchParams.get('videoMaps')?.split(',').filter(Boolean) ?? [];
@@ -135,11 +133,11 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
             }
         }
 
-        if (!searchParams.get('colors') || Object.keys(JSON.parse(searchParams.get('colors') || '{}')).length < Object.keys(convertedConsolidations).length) {
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.set('colors', JSON.stringify(colors));
-            router.push(`${pathname}?${newSearchParams.toString()}`);
-        }
+        // if (!searchParams.get('colors') || Object.keys(JSON.parse(searchParams.get('colors') || '{}')).length < Object.keys(convertedConsolidations).length) {
+        //     const newSearchParams = new URLSearchParams(searchParams);
+        //     newSearchParams.set('colors', JSON.stringify(colors));
+        //     router.push(`${pathname}?${newSearchParams.toString()}`);
+        // }
 
     }
 
