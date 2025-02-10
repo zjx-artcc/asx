@@ -33,7 +33,6 @@ export default function VideoMapSelector({allVideoMaps}: { allVideoMaps: VideoMa
     const handleChange = (e: SyntheticEvent, v: VideoMapWithMappings[]) => {
         setSelectedVideoMaps(v);
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.delete('videoMap');
         newSearchParams.set('videoMaps', v.map(videoMap => videoMap.id).join(','));
         router.push(`${pathname}?${newSearchParams.toString()}`);
     }
