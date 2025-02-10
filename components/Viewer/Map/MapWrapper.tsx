@@ -51,18 +51,18 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         }
     }
 
-    if (idsConsolidations && !sectorIds
-        .every((si) =>
-            allSectors.filter((s) =>
-                idsConsolidations.map((i) => i.primarySectorId)
-                    .includes(s.idsRadarSectorId))
-                .map((s) => s.id)
-                .includes(si))) {
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.delete('sectors');
-        router.push(`${pathname}?${newSearchParams.toString()}`);
-        // toast.warning('The active split has changed to something that makes your configuration invalid.  The page has refreshed.')
-    }
+    // if (idsConsolidations && !sectorIds
+    //     .every((si) =>
+    //         allSectors.filter((s) =>
+    //             idsConsolidations.map((i) => i.primarySectorId)
+    //                 .includes(s.idsRadarSectorId))
+    //             .map((s) => s.id)
+    //             .includes(si))) {
+    //     const newSearchParams = new URLSearchParams(searchParams);
+    //     newSearchParams.delete('sectors');
+    //     router.push(`${pathname}?${newSearchParams.toString()}`);
+    //     // toast.warning('The active split has changed to something that makes your configuration invalid.  The page has refreshed.')
+    // }
 
     const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
     const conditions = allConditions.filter(condition => conditionIds.includes(condition.id));
@@ -105,7 +105,7 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
         );
     }
 
-    let colors: { [key: string]: string, } = {};
+    const colors: { [key: string]: string, } = {};
 
     const convertedConsolidations: { [key: string]: string } = {};
     const colorLegend: { color: string, name: string, frequency: string, }[] = [];
@@ -119,7 +119,11 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
             if (!primaryMap || !primarySector) continue;
 
             colors[primaryMap.jsonKey] = color;
-            // colorLegend.push({color, name: primarySector?.name || 'UNK', frequency: primarySector?.frequency || 'test' });
+            colorLegend.push({
+                color,
+                name: primarySector?.name || 'UNK',
+                frequency: primarySector?.frequency || 'test'
+            });
             convertedConsolidations[primaryMap.jsonKey] = primaryMap.jsonKey;
             for (const secondarySectorId of idsConsolidation.secondarySectorIds) {
                 const secondaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === secondarySectorId)?.id);
@@ -135,13 +139,6 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
             const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.set('colors', JSON.stringify(colors));
             router.push(`${pathname}?${newSearchParams.toString()}`);
-        } else if (idsConsolidations) {
-            colors = JSON.parse(searchParams.get('colors') || '{}');
-            for (const [jsonKey, color] of Object.entries(colors)) {
-                const sector = sectors.filter(s => idsConsolidations.map(i => i.primarySectorId).includes(s.idsRadarSectorId)).find((s) => s.mappings.map(m => m.jsonKey).includes(jsonKey));
-                if (!sector) continue;
-                colorLegend.push({color, name: sector.name || 'UNK', frequency: sector.frequency || '199.998'});
-            }
         }
 
     }

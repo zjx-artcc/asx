@@ -134,10 +134,11 @@ export default function AltitudeInformation({sectors, manualOwnedBy}: {
                 maxWidth: "350px",
                 minHeight: "1vw",
                 position: "absolute",
-                right: 0,
-                top: 0,
+                left: 0,
+                bottom: 0,
                 zIndex: 999,
                 m: 2,
+                mb: 4,
                 p: 2,
             }}
         >
