@@ -1,5 +1,5 @@
 'use client';
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {Box, Card, CardContent} from "@mui/material";
 import LeafletMap from "@/components/Viewer/LeafletMap/Map";
 import Geojson from "@/components/GeoJSON/GeoJSON";
@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import {useColorScheme} from "@mui/material/styles";
 import AltitudeInformationWrapper from "@/components/Viewer/Tooltips/AltitudeInformationWrapper";
 import ColorLegendWrapper from "@/components/Viewer/Tooltips/ColorLegendWrapper";
+import {useSearchParams} from "next/navigation";
 
 export type GeoJSONWithColor = {
     key: string,
@@ -37,41 +38,68 @@ export default function Map({videoMapKeys, sectorKeys, colors, ownedBy, colorLeg
     colorLegend: { color: string, name: string, frequency: string, }[],
 }) {
 
+    const searchParams = useSearchParams();
     const {colorScheme} = useColorScheme();
     const [files, setFiles] = React.useState<GeoJSONWithColor[]>([]);
 
     const fetchJson = async (key: string) => {
-        const res = await fetch(`https://utfs.io/f/${key}`);
+        const res = await fetch(`https://utfs.io/f/${key}`, {
+            next: {
+                revalidate: 0,
+            },
+        });
         return await res.json();
     }
 
-    useEffect(() => {
-        const fetchAll = async () => {
-            const videoFiles = await Promise.all(videoMapKeys.map(fetchJson));
-            const sectorFiles = await Promise.all(sectorKeys.map(fetchJson));
-            return [
-                ...videoFiles.map((json, index) => ({
-                    key: videoMapKeys[index],
-                    json,
-                    color: json?.crs?.properties?.color || 'black',
-                    videoMap: true,
-                })),
-                ...sectorFiles.map((json, index) => ({
-                    key: sectorKeys[index],
-                    json,
-                    color: colors[sectorKeys[index]] || json?.crs?.properties?.color || 'black',
-                    videoMap: false,
-                }))
-            ] satisfies GeoJSONWithColor[];
+    const fetchAll = useCallback(async () => {
+
+        const videoFiles = [];
+        const sectorFiles = [];
+
+        for (const key of videoMapKeys) {
+            videoFiles.push(await fetchJson(key));
         }
 
-        fetchAll().then(setFiles);
+        for (const key of sectorKeys) {
+            sectorFiles.push(await fetchJson(key));
+        }
 
-    }, [videoMapKeys, sectorKeys, colors]);
+        return [
+            ...videoFiles.map((json, index) => ({
+                key: videoMapKeys[index],
+                json,
+                color: json?.crs?.properties?.color || 'black',
+                videoMap: true,
+            })),
+            ...sectorFiles.map((json, index) => ({
+                key: sectorKeys[index],
+                json,
+                color: colors[sectorKeys[index]] || json?.crs?.properties?.color || 'black',
+                videoMap: false,
+            }))
+        ] satisfies GeoJSONWithColor[];
+    }, [colors, sectorKeys, videoMapKeys]);
+
+    useEffect(() => {
+
+        const videoMaps = (searchParams.get('videoMaps')?.split(',') || []).filter(Boolean);
+        const sectorMaps = (searchParams.get('sectors')?.split(',') || []).filter(Boolean);
+
+        if (files.length > videoMaps.length + sectorMaps.length) {
+            fetchAll().then(setFiles);
+        } else {
+            fetchAll().then(setFiles);
+        }
+
+    }, [fetchAll, files.length, searchParams]);
 
     return (
-        <Card sx={{height: '100%', display: 'flex', flexDirection: 'column'}}>
-            <CardContent sx={{flex: '1 1 auto',}}>
+        <Card sx={{height: '100%', display: 'flex', flexDirection: 'column',}}>
+            <CardContent sx={{
+                p: '0 !important',
+                flex: '1 1 auto',
+                backgroundColor: colorScheme === 'dark' ? '#4e4e4e' : 'lightgray',
+            }}>
                 <Box sx={{
                     position: 'relative',
                     width: '100%',
@@ -84,7 +112,7 @@ export default function Map({videoMapKeys, sectorKeys, colors, ownedBy, colorLeg
                         zoom={ZOOM}
                         style={{
                             position: 'absolute',
-                            background: colorScheme === 'dark' ? '#4e4e4e' : 'lightgray',
+                            background: 'transparent',
                             width: '100%',
                             height: '100%',
                         }}

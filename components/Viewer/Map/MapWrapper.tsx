@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
     AirspaceConditionWithContainer,
     MappingJsonWithConditions,
@@ -21,49 +21,46 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
 }) {
 
     const searchParams = useSearchParams();
+    const [videoMaps, setVideoMaps] = React.useState<VideoMapWithMappings[]>([]);
+    const [sectors, setSectors] = React.useState<SectorMappingWithConditions[]>([]);
+    const [conditions, setConditions] = React.useState<AirspaceConditionWithContainer[]>([]);
 
-    const videoMapIds = searchParams.get('videoMaps')?.split(',').filter(Boolean) ?? [];
-    const videoMaps = allVideoMaps.filter(videoMap => videoMapIds.includes(videoMap.id));
+    useEffect(() => {
 
+        const videoMapIds = searchParams.get('videoMaps')?.split(',').filter(Boolean) ?? [];
+        setVideoMaps(allVideoMaps.filter(videoMap => videoMapIds.includes(videoMap.id)));
 
-    const sectorIds = searchParams.get('sectors')?.split(',').filter((i) => !!i) ?? [];
+        const sectorIds = searchParams.get('sectors')?.split(',').filter((i) => !!i) ?? [];
 
-    let sectors: SectorMappingWithConditions[] = [];
+        if (!searchParams.get('sectors')) {
+            setSectors([]);
+        } else {
+            const allSectors = allFacilities.flatMap(facility => facility.sectors);
+            const sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
 
-    const allSectors = allFacilities.flatMap(facility => facility.sectors);
+            if (idsConsolidations && idsConsolidations.length > 0) {
+                idsConsolidations
+                    .forEach(idsConsolidation => {
+                        if (!sectors.map(sector => sector.idsRadarSectorId).includes(idsConsolidation.primarySectorId)) {
+                            return;
+                        }
+                        const secondarySectors = [idsConsolidations[0], ...idsConsolidation.secondarySectorIds];
+                        const consolidatedSectors = allSectors
+                            .filter(sector => secondarySectors.includes(sector.idsRadarSectorId))
+                            .filter(sector => !sectors.includes(sector));
+                        sectors.push(...consolidatedSectors);
+                    });
+            }
 
-    if (sectorIds.length > 0) {
-        sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
-        if (idsConsolidations) {
-            idsConsolidations
-                .forEach(idsConsolidation => {
-                    if (!sectors.map(sector => sector.idsRadarSectorId).includes(idsConsolidation.primarySectorId)) {
-                        return;
-                    }
-                    const secondarySectors = [idsConsolidations[0], ...idsConsolidation.secondarySectorIds];
-                    const consolidatedSectors = allSectors
-                        .filter(sector => secondarySectors.includes(sector.idsRadarSectorId))
-                        .filter(sector => !sectors.includes(sector));
-                    sectors.push(...consolidatedSectors);
-                });
+            setSectors(sectors);
         }
-    }
 
-    // if (idsConsolidations && !sectorIds
-    //     .every((si) =>
-    //         allSectors.filter((s) =>
-    //             idsConsolidations.map((i) => i.primarySectorId)
-    //                 .includes(s.idsRadarSectorId))
-    //             .map((s) => s.id)
-    //             .includes(si))) {
-    //     const newSearchParams = new URLSearchParams(searchParams);
-    //     newSearchParams.delete('sectors');
-    //     router.push(`${pathname}?${newSearchParams.toString()}`);
-    //     // toast.warning('The active split has changed to something that makes your configuration invalid.  The page has refreshed.')
-    // }
 
-    const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
-    const conditions = allConditions.filter(condition => conditionIds.includes(condition.id));
+        const conditionIds = searchParams.get('conditions')?.split(',') ?? [];
+        setConditions(allConditions.filter(condition => conditionIds.includes(condition.id)));
+
+
+    }, [allConditions, allFacilities, allVideoMaps, idsConsolidations, searchParams]);
 
     if (videoMaps.length === 0) {
         return (
@@ -106,45 +103,43 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
     const colors: { [key: string]: string, } = {};
 
     const convertedConsolidations: { [key: string]: string } = {};
-    const colorLegend: { color: string, name: string, frequency: string, }[] = [];
+    const colorLegend: { color: string, name: string, order: number, frequency: string, }[] = [];
 
-    if (idsConsolidations) {
-        for (const idsConsolidation of idsConsolidations) {
-            const color = getRandomSharpHexColor(Object.values(colors));
-            const primarySector = sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId);
-            const primaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId)?.id);
+    
+    for (const idsConsolidation of idsConsolidations || []) {
+        const uniqueColors = Object.values(colors).filter((value, index, self) => self.indexOf(value) === index);
+        const color = getRandomSharpHexColor(uniqueColors.length);
+        const primarySector = sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId);
+        const primaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === idsConsolidation.primarySectorId)?.id);
 
-            if (!primaryMap || !primarySector) continue;
+        if (!primaryMap || !primarySector) continue;
 
-            colors[primaryMap.jsonKey] = color;
-            colorLegend.push({
-                color,
-                name: primarySector?.name || 'UNK',
-                frequency: primarySector?.frequency || 'test'
-            });
-            convertedConsolidations[primaryMap.jsonKey] = primaryMap.jsonKey;
-            for (const secondarySectorId of idsConsolidation.secondarySectorIds) {
-                const secondaryMap = jsons?.sectorJsons?.find((j) => j.sectorMappingId === sectors.find((s) => s.idsRadarSectorId === secondarySectorId)?.id);
+        colors[primaryMap.jsonKey] = color;
+        colorLegend.push({
+            color,
+            name: primarySector?.name || 'UNK',
+            order: allFacilities.find(f => f.id === primarySector?.radarFacilityId)?.order || 0,
+            frequency: primarySector?.frequency || '199.998'
+        });
+        convertedConsolidations[primaryMap.jsonKey] = primaryMap.jsonKey;
+        for (const secondarySectorId of idsConsolidation.secondarySectorIds) {
+            const secondaryMap = jsons?.sectorJsons?.find(
+                (j) =>
+                    j.sectorMappingId === sectors
+                        .find((s) => s.idsRadarSectorId === secondarySectorId)?.id);
 
-                if (!secondaryMap) continue;
+            if (!secondaryMap) continue;
 
-                colors[secondaryMap.jsonKey] = color;
-                convertedConsolidations[secondaryMap.jsonKey] = primaryMap.jsonKey;
-            }
+            colors[secondaryMap.jsonKey] = color;
+            convertedConsolidations[secondaryMap.jsonKey] = primaryMap.jsonKey;
         }
-
-        // if (!searchParams.get('colors') || Object.keys(JSON.parse(searchParams.get('colors') || '{}')).length < Object.keys(convertedConsolidations).length) {
-        //     const newSearchParams = new URLSearchParams(searchParams);
-        //     newSearchParams.set('colors', JSON.stringify(colors));
-        //     router.push(`${pathname}?${newSearchParams.toString()}`);
-        // }
-
     }
-
 
     return jsons?.videoJsons && jsons?.sectorJsons && (
         <Map videoMapKeys={jsons.videoJsons.map((j) => j.jsonKey)} sectorKeys={jsons.sectorJsons.map(sj => sj.jsonKey)}
-             colors={colors} ownedBy={convertedConsolidations} colorLegend={colorLegend}/>
+             colors={colors} ownedBy={convertedConsolidations} colorLegend={
+            colorLegend.sort((a, b) => a.name.localeCompare(b.name))
+        }/>
     );
 
 }
@@ -179,7 +174,6 @@ const getJsons = (videoMaps: VideoMapWithMappings[], sectors: SectorMappingWithC
     for (const sector of sectors) {
 
         if (sector.mappings.length === 0) {
-            // errors.push(`Sector ${sector.name} has no GEOJSON mappings.`);
             continue;
         }
 
@@ -227,18 +221,19 @@ const getBestMapping = (availableMappings: MappingJsonWithConditions[], conditio
         .filter((airport, index, self) => self.indexOf(airport) === index);
 }
 
-function getRandomSharpHexColor(previousColors: string[]): string {
+function getRandomSharpHexColor(existingColors: number): string {
     const distinctColors = [
-        "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF",
-        "#800000", "#808000", "#008000", "#800080", "#808080", "#008080",
-        "#C0C0C0", "#FFA500", "#A52A2A", "#7FFF00", "#D2691E", "#DC143C",
-        "#FF1493", "#00BFFF", "#4B0082", "#32CD32", "#FFD700", "#20B2AA",
-        "#FF4500", "#DA70D6", "#B0C4DE", "#9370DB", "#3CB371", "#7B68EE",
-        "#ADFF2F", "#BA55D3", "#F08080", "#E6E6FA", "#90EE90", "#FF6347",
-        "#4682B4", "#9ACD32", "#EE82EE", "#6A5ACD", "#708090", "#2E8B57",
-        "#9932CC", "#8B0000", "#556B2F", "#9400D3", "#696969", "#8B008B",
-        "#B22222", "#5F9EA0"
+        "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FF4500", "#32CD32", "#8A2BE2",
+        "#FFD700", "#DC143C", "#1E90FF", "#ADFF2F", "#FF1493", "#00FA9A", "#FF6347", "#7B68EE", "#FF8C00",
+        "#40E0D0", "#FF69B4", "#2E8B57", "#DAA520", "#BA55D3", "#4169E1", "#008B8B", "#B22222", "#FF7F50",
+        "#4682B4", "#9932CC", "#3CB371", "#FF4500", "#8B0000", "#556B2F", "#E9967A", "#8B008B", "#20B2AA",
+        "#FFD700", "#6495ED", "#DC143C", "#00CED1", "#C71585", "#808000", "#FF00FF", "#008000", "#483D8B",
+        "#FFA500", "#008080", "#B8860B", "#191970", "#D2691E",
     ];
 
-    return distinctColors[previousColors.length % distinctColors.length];
+    if (existingColors >= distinctColors.length) {
+        return distinctColors[existingColors % distinctColors.length];
+    }
+
+    return distinctColors[existingColors];
 }

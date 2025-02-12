@@ -14,7 +14,7 @@ export default function ActiveConsolidationsCopyButton() {
 
     return (
         <Tooltip title="Copy Active Consolidations Link">
-            <IconButton sx={{mr: 1,}} onClick={handleClick}>
+            <IconButton sx={{mr: 1,}} onClick={handleClick} color="inherit">
                 <Share/>
             </IconButton>
         </Tooltip>

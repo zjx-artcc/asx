@@ -38,6 +38,7 @@ export default async function AirspaceViewer({idsConsolidations, defaultConditio
     idsConsolidations?: IdsConsolidation[],
     defaultConditions?: AirspaceCondition[],
 }) {
+
     const allContainers = await prisma.airspaceConditionContainer.findMany({
         include: {
             conditions: true,
