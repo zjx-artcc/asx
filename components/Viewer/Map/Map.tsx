@@ -43,11 +43,7 @@ export default function Map({videoMapKeys, sectorKeys, colors, ownedBy, colorLeg
     const [files, setFiles] = React.useState<GeoJSONWithColor[]>([]);
 
     const fetchJson = async (key: string) => {
-        const res = await fetch(`https://utfs.io/f/${key}`, {
-            next: {
-                revalidate: 0,
-            },
-        });
+        const res = await fetch(`https://utfs.io/f/${key}`);
         return await res.json();
     }
 

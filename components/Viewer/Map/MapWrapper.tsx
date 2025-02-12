@@ -27,6 +27,7 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
 
     useEffect(() => {
 
+
         const videoMapIds = searchParams.get('videoMaps')?.split(',').filter(Boolean) ?? [];
         setVideoMaps(allVideoMaps.filter(videoMap => videoMapIds.includes(videoMap.id)));
 
@@ -36,12 +37,21 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
             setSectors([]);
         } else {
             const allSectors = allFacilities.flatMap(facility => facility.sectors);
-            const sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
+            let sectors = allSectors.filter(sector => sectorIds.includes(sector.id));
 
             if (idsConsolidations && idsConsolidations.length > 0) {
+
                 idsConsolidations
                     .forEach(idsConsolidation => {
-                        if (!sectors.map(sector => sector.idsRadarSectorId).includes(idsConsolidation.primarySectorId)) {
+
+                        const primarySector = allSectors.find(sector => sector.idsRadarSectorId === idsConsolidation.primarySectorId);
+
+                        if (!sectors.map(sector => sector.idsRadarSectorId).includes(idsConsolidation.primarySectorId)
+                            || !sectorIds.includes(primarySector?.id || '')) {
+                            const sectorsIdsToRemove = allSectors
+                                .filter(sector => sector.idsRadarSectorId === idsConsolidation.primarySectorId)
+                                .map(sector => sector.id);
+                            sectors = sectors.filter(sector => !sectorsIdsToRemove.includes(sector.id));
                             return;
                         }
                         const secondarySectors = [idsConsolidations[0], ...idsConsolidation.secondarySectorIds];
@@ -94,7 +104,7 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
                     <Typography variant="subtitle1" gutterBottom>The map could not be rendered for the following
                         reasons:</Typography>
                     {jsons.errors.map((error, idx) => <Typography key={idx} variant="subtitle2"
-                                                            gutterBottom>{error}</Typography>)}
+                                                                  gutterBottom>{error}</Typography>)}
                 </CardContent>
             </Card>
         );
@@ -105,7 +115,7 @@ export default function MapWrapper({allConditions, allVideoMaps, allFacilities, 
     const convertedConsolidations: { [key: string]: string } = {};
     const colorLegend: { color: string, name: string, order: number, frequency: string, }[] = [];
 
-    
+
     for (const idsConsolidation of idsConsolidations || []) {
         const uniqueColors = Object.values(colors).filter((value, index, self) => self.indexOf(value) === index);
         const color = getRandomSharpHexColor(uniqueColors.length);
