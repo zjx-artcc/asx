@@ -1,7 +1,7 @@
 services:
   web:
-    image: ghcr.io/zjx-artcc/zsx:master
+    image: ghcr.io/zjx-artcc/asx:master
     ports:
-      - 3700:3000
+      - 3400:3000
     container_name: website
     restart: unless-stopped
