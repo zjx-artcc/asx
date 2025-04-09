@@ -10,6 +10,8 @@ import {getServerSession} from "next-auth";
 import {authOptions} from "@/auth/auth";
 import {ToastContainer} from "react-toastify";
 import {Metadata} from "next";
+import Image from "next/image";
+import background from '../public/img/home-bg.jpg'
 
 const roboto = Roboto({
     weight: ['300', '400', '500', '700'],
@@ -36,9 +38,12 @@ export default async function RootLayout({
     <body className={roboto.variable}>
     <AppRouterCacheProvider>
         <ThemeProvider theme={theme}>
+          <div>
             <Navbar session={session}/>
             {children}
             <ToastContainer theme="dark"/>
+            <Image src={background} alt='radar' style={{position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, zIndex: -10, opacity: 0.3, filter: 'blur(1px)', overflow: 'hidden'}}/>
+          </div>
         </ThemeProvider>
     </AppRouterCacheProvider>
       </body>
