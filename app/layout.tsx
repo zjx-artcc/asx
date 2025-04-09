@@ -21,8 +21,8 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-    title: 'vZDC ASX',
-    description: 'vZDC ASX',
+    title: 'vZJX Airspace Explorer',
+    description: 'vZJX Airspace Explorer',
 };
 
 export default async function RootLayout({

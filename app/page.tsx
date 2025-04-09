@@ -27,8 +27,7 @@ export default function Home() {
                 </CardMedia>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>Active Radar Consolidations</Typography>
-                  <Typography>See the current radar splits vZDC is using. Accuracy is not guaranteed unless explicitly
-                    communicated through official mediums.</Typography>
+                  <Typography>View current radar splits for vZJX. This is not always used, so please confirm that this is the official source.</Typography>
                 </CardContent>
               </CardActionArea>
             </Card>
@@ -52,8 +51,7 @@ export default function Home() {
                 </CardMedia>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>Airspace Explorer</Typography>
-                  <Typography>Get to know your facility better by visualizing the airspace encompassed by
-                    vZDC.</Typography>
+                  <Typography>Take a look at all of the airspace in vZJX.</Typography>
                 </CardContent>
               </CardActionArea>
             </Card>
