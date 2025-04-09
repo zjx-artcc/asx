@@ -41,7 +41,7 @@ export default async function RootLayout({
           <div>
             <Navbar session={session}/>
             {children}
-            <ToastContainer theme="dark"/>
+            <ToastContainer theme="dark" position="bottom-right"/>
             <Image src={background} alt='radar' style={{position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, zIndex: -10, opacity: 0.3, filter: 'blur(1px)', overflow: 'hidden'}}/>
           </div>
         </ThemeProvider>
