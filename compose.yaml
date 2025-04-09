@@ -3,5 +3,5 @@ services:
     image: ghcr.io/zjx-artcc/asx:master
     ports:
       - 3400:3000
-    container_name: website
+    container_name: asx
     restart: unless-stopped
