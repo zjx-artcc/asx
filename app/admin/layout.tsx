@@ -8,8 +8,8 @@ import {Metadata} from "next";
 const {IS_STAFF_ENDPOINT} = process.env;
 
 export const metadata: Metadata = {
-    title: 'Admin | vZDC ASX',
-    description: 'vZDC ASX admin page',
+    title: 'Admin | vZJX Airspace Explorer',
+    description: 'vZJX Airspace Explorer admin',
 };
 
 export default async function Layout({children}: { children: React.ReactNode }) {

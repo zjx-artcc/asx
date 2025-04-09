@@ -8,7 +8,7 @@ export default function Logo() {
         (<Link href="/">
             <Image
                 src={logo}
-                alt={"Washington ARTCC Logo"}
+                alt={"ZJX ARTCC Logo"}
                 width={215}
                 style={{
                     maxWidth: "100%",

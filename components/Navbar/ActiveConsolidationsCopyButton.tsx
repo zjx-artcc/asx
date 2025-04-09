@@ -7,7 +7,7 @@ import {toast} from "react-toastify";
 export default function ActiveConsolidationsCopyButton() {
 
     const handleClick = async () => {
-        await navigator.clipboard.writeText('https://asx.vzdc.org/active-consolidations');
+        await navigator.clipboard.writeText('https://asx.zjxartcc.org/active-consolidations');
 
         toast.success('Active consolidations link copied to clipboard');
     }

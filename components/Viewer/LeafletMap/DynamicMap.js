@@ -27,8 +27,8 @@ const Map = ({children, ...rest}) => {
                 <div className=" leaflet-bottom leaflet-left">
                     <div className="leaflet-control-attribution leaflet-control">
                         &copy; 2025&nbsp;
-                        <Link href="https://vzdc.org">
-                            Virtual Washington ARTCC
+                        <Link href="https://zjxartcc.org">
+                            Virtual Jacksonville ARTCC
                         </Link>
                     </div>
                 </div>
