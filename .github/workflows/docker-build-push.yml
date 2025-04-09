@@ -73,7 +73,6 @@ jobs:
   deploy:
     runs-on: self-hosted
     needs: build-and-push
-    environment: Development
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -83,3 +82,20 @@ jobs:
         run: docker pull ghcr.io/${{ github.repository }}:master-latest
       - name: Run container
         run: docker compose up -d
+    env:
+      DEV_MODE: false
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
+      NEXTAUTH_URL: ${{secrets.NEXTAUTH_URL}}
+      NEXTAUTH_SECRET: ${{secrets.NEXTAUTH_SECRET}}
+      VATSIM_CLIENT_ID: ${{secrets.VATSIM_CLIENT_ID}}
+      VATSIM_CLIENT_SECRET: ${{secrets.VATSIM_CLIENT_SECRET}}
+      VATUSA_FACILITY: ${{secrets.VATUSA_FACILITY}}
+      NEXT_PUBLIC_MAP_DEFAULT_CENTER_LAT: ${{secrets.NEXT_PUBLIC_MAP_DEFUALT_CENTER_LAT}}
+      NEXT_PUBLIC_MAP_DEFAULT_CENTER_LONG: ${{secrets.NEXT_PUBLIC_MAP_DEFUALT_CENTER_LONG}}
+      NEXT_PUBLIC_MAP_DEFAULT_ZOOM: ${{secrets.NEXT_PUBLIC_MAP_DEFUALT_ZOOM}}
+      IS_STAFF_ENDPOINT: ${{secrets.IS_STAFF_ENDPOINT}}
+      IDS_CONSOLIDATIONS_URL: ${{secrets.IDS_CONSOLIDATIONS_URL}}
+      IDS_RADAR_URL: ${{secrets.IDS_RADAR_URL}}
+      IDS_SECTOR_URL: ${{secrets.IDS_SECTOR_URL}}
+      UPLOADTHING_TOKEN: ${{secrets.UPLOADTHING_TOKEN}}
+
