@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/zjx-artcc/asx:master
+    image: ghcr.io/zjx-artcc/asx:master-latest
     ports:
       - 3400:3000
     container_name: asx
