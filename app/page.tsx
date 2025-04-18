@@ -1,7 +1,7 @@
 import {Card, CardActionArea, CardContent, CardMedia, Container, Grid2, Typography} from "@mui/material";
 import Image from "next/image";
 import airspaceExplorer from "@/public/img/airspace-explorer.png";
-import activeConsolidations from "@/public/img/active-consolidations.png";
+import activeConsolidations from "@/public/img/active-consolidations.jpg";
 import Link from "next/link";
 
 
